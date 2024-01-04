@@ -13,7 +13,7 @@ With pip:
 
 `pip install mwprop`
 
-With GitHub: [github.com/stella-ocker/mwprop_dev](https://github.com/stella-ocker/mwprop).\
+With GitHub: [github.com/stella-ocker/mwprop](https://github.com/stella-ocker/mwprop).\
 Standalone scripts `NE2001p.py` and `los_diagnostics.py` are provided under the /bin/ directory. These scripts require `mwprop` to be installed. 
 
 **Dependencies**
