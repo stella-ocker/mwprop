@@ -11,7 +11,7 @@ MWPROP provides `NE2001p`, a native Python implementation of the original Fortra
 
 With pip (note this is a test package):
 
-`python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps example-package-mwprop-test1`
+`pip install mwprop`
 
 With GitHub: [github.com/stella-ocker/mwprop_dev](https://github.com/stella-ocker/mwprop).\
 Standalone scripts `NE2001p.py` and `los_diagnostics.py` are provided under the /bin/ directory. These scripts require `mwprop` to be installed. 
