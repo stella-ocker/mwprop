@@ -13,7 +13,7 @@ With pip (note this is a test package):
 
 `python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps example-package-mwprop-test1`
 
-With GitHub (this is a private development repo): [github.com/stella-ocker/mwprop_dev](https://github.com/stella-ocker/mwprop_dev).\
+With GitHub: [github.com/stella-ocker/mwprop_dev](https://github.com/stella-ocker/mwprop).\
 Standalone scripts `NE2001p.py` and `los_diagnostics.py` are provided under the /bin/ directory. These scripts require `mwprop` to be installed. 
 
 **Dependencies**
