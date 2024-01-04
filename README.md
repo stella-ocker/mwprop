@@ -2,7 +2,10 @@
 
 Jan 2024 v1.0
 
-MWPROP provides `NE2001p`, a native Python implementation of the original Fortran code for NE2001. The package also contains a required `scattering_functions` module. NE2001p is accessible from the command line, similar to the Fortran code, or within Python scripts (see below). Future package releases will include additional modules for extensions of the NE2001 model. Please cite the NE2001p research note [arXiv/RNAAS DOI TBD] for use of this package. The NE2001 model is described in detail in [Cordes & Lazio (2002; ](https://arxiv.org/abs/astro-ph/0207156)[2003)](https://arxiv.org/abs/astro-ph/0301598). 
+MWPROP provides `NE2001p`, a native Python implementation of the original Fortran code for NE2001. The package also contains a required `scattering_functions` module. NE2001p is accessible from the command line, similar to the Fortran code, or within Python scripts (see below). Future package releases will include additional modules for extensions of the NE2001 model. 
+
+Please cite the NE2001p research note [arXiv/RNAAS DOI TBD] for use of this package.\
+The NE2001 model is described in detail in [Cordes & Lazio (2002; ](https://arxiv.org/abs/astro-ph/0207156)[2003)](https://arxiv.org/abs/astro-ph/0301598). 
 
 
 -----
