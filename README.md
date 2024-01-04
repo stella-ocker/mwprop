@@ -133,7 +133,7 @@ In analysis and plotting modes, output files are saved to a folder called 'outpu
 Plots electron density, DM, and C_n^2 along the line of sight designated by l, b, DM or d, and ndir = 1 or -1 (as with NE2001).
 Also shows the line of sight projected onto the Galactic plane along with spiral arms used in NE2001.
 
-The code can be downloaded from this repository under /src/mwprop/ne2001p/ but can be run from any directory, if `mwprop` is fully installed. Outputs are saved to a folder created in the user's working directory.
+The code can be downloaded from this repository under /bin/ but can be run from any directory, if `mwprop` is fully installed. Outputs are saved to a folder created in the user's working directory.
 
     >>> Usage:
     >>> python los_diagnostics.py  l  b  dmd  ndir   
