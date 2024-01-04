@@ -9,7 +9,7 @@ MWPROP provides `NE2001p`, a native Python implementation of the original Fortra
 
 ## Installation:
 
-With pip (note this is a test package):
+With pip:
 
 `pip install mwprop`
 
