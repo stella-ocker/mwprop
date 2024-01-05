@@ -89,7 +89,7 @@ global xgc, ygc, zpgc, rgc, hgc, negc0, Fgc0
 # --------------------------------------------------------------------
 
 def ne2001(ldeg, bdeg, dmd, ndir, 
-	classic=True, dmd_only=False, 
+	classic=True, dmd_only=True, 
 	do_analysis=False, plotting=False, verbose=False, debug=False):
 	"""
 	Calculates d from DM or DM from d for ndir >= 0 or ndir < 0
