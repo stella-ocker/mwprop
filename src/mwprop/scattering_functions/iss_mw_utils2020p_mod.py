@@ -41,7 +41,7 @@ def theta_iso_at_RF(RF, SMiso, DEFFSM, scattype,  si=11./3.):
            DEFFSM   kpc
            si = wavenumber spectral index for electron-density (e.g. 11/3)
    Output: 
-           THETA_ISO		    mas at 1 GHz
+           THETA_ISO            mas at 1 GHz
            THETA_ISO_RF         mas at RF
 
    Notes:
@@ -92,10 +92,10 @@ def theta_iso_at_RF(RF, SMiso, DEFFSM, scattype,  si=11./3.):
       THETA_ISO = 10.**theta_log_radian / mas
       THETA_ISO_RF = THETA_ISO * RF**xiso
 
-   if scattype == 'weak':		# NEEDS CHECKING
+   if scattype == 'weak':       # NEEDS CHECKING
       xiso = -0.5 
       rF_1GHz = np.sqrt(wavelen1GHz * DEFFSM * kpc / (2.*pi))
-      THETA_ISO = (wavelen1GHz / rF_1GHz) / mas		# mas at 1 GHz 
+      THETA_ISO = (wavelen1GHz / rF_1GHz) / mas     # mas at 1 GHz 
       THETA_ISO_RF = THETA_ISO * RF**xiso
 
    return THETA_ISO, THETA_ISO_RF
@@ -115,8 +115,8 @@ def scale_diss_params_to_RF(rfratio, TAU, THETA_X, si=11./3.):
            THETA_X      mas
            si = wavenumber spectral index for electron-density  
    Output: 
-           TAU_RF		    ms at RF  
-           THETA_X_RF		mas at RF
+           TAU_RF           ms at RF  
+           THETA_X_RF       mas at RF
    """
 
    xsbw = 2.*si / (si-2.)
@@ -144,11 +144,11 @@ def scale_NE2001_output_to_RF(RF,TAU,SBW,SCINTIME,THETA_G,THETA_X,si=11./3.):
            RF           GHz
            si = wavenumber spectral index for electron-density  
    Output: 
-           TAU_RF		    ms at RF  
-           SBW_RF		    MHz at RF  
-           SCINTIME_RF		sec at RF  
-           THETA_G_RF		mas at RF  
-           THETA_X_RF		mas at RF
+           TAU_RF           ms at RF  
+           SBW_RF           MHz at RF  
+           SCINTIME_RF      sec at RF  
+           THETA_G_RF       mas at RF  
+           THETA_X_RF       mas at RF
    """
 
    xsbw = 2.*si / (si-2.)
@@ -184,7 +184,7 @@ def ggpdf(x, rms1, rms2):
 
    e1 = (a+b)/2. 
    nu = a-b
-   arg1 = 2. * np.sqrt(a*b*x)	
+   arg1 = 2. * np.sqrt(a*b*x)   
 
    #coeff1 = (2. * (a*b)**e1) / (gamma(a) * gamma(b)) 
    coeffln = np.log(2.) + e1*np.log(a*b) - gammaln(a) - gammaln(b)
@@ -270,7 +270,7 @@ def calculate_fresnel_scale_and_mod_indices(RF, DEFFSM, THETA_X_RF, si=11./3.):
     """
 
     wavelength = c / (RF*GHz)
-    rF = np.sqrt(DEFFSM *kpc * wavelength / (2.*pi))	# Fresnel scale cm
+    rF = np.sqrt(DEFFSM *kpc * wavelength / (2.*pi))    # Fresnel scale cm
 
     phiF = np.sqrt(2.) * \
        ( (pi*THETA_X_RF*mas * rF / wavelength) / (2.*np.sqrt(np.log(2.))) )**((si-2.)/2.) 
@@ -290,7 +290,7 @@ def calculate_fresnel_scale_and_mod_indices(RF, DEFFSM, THETA_X_RF, si=11./3.):
     mrp = np.sqrt(2.) * u * (2*u)**(si-4.) / np.sqrt((2*u)**(2.*(si-4.)) + 2.*u**2)
 
     mgp = np.sqrt((1.+mdp**2)*(1.+mrp**2)-1.)
-    if u <= 1.:		# no distinction between r,d
+    if u <= 1.:     # no distinction between r,d
        lg = rF
        ld = rF
        lr = rF
@@ -361,15 +361,15 @@ def calc_pdfg_for_xgal_los(RF, BW, RF_input, TAU, THETA_X, Deff, SM,
     a line of sight characterized by TAU, THETA_X, Deff, SM
     and for the specified RF and bandwidth.
 
-    RF  		    Radio frequency of evaluated PDF, CDF       GHz
-    BW              Bandwidth			                        MHz
+    RF              Radio frequency of evaluated PDF, CDF       GHz
+    BW              Bandwidth                                   MHz
     RF_input        Radio frequency of input ISS values         GHz
     TAU             Pulse broadening time                        ms
     THETA_X         Angular diameter of extragalactic 
                     source caused by MW scattering              mas
     Deff            Effective distance to MW scattering region  kpc
     SM              Scattering measure                          kpc m^{-20/}
-    theta_source	Source size as seen by ISM	                mas
+    theta_source    Source size as seen by ISM                  mas
     dg,gmin,gmax    Sample interval and Range for gain g in pdf,cdf
     si              Spectral index of electron density
                     wavenumber spectrum (11/3 for Kolmogorov)
@@ -415,7 +415,7 @@ def calc_pdfg_for_xgal_los(RF, BW, RF_input, TAU, THETA_X, Deff, SM,
 
     if scattype == 'strong':
        stypelab = 'S'
-       mg = np.sqrt(md**2 + mr**2 + (md*mr)**2)	# ok for strong scattering
+       mg = np.sqrt(md**2 + mr**2 + (md*mr)**2) # ok for strong scattering
        mdtrans = 0.5 + 0.25*mr
 
        if md <= mdtrans:
@@ -429,14 +429,14 @@ def calc_pdfg_for_xgal_los(RF, BW, RF_input, TAU, THETA_X, Deff, SM,
        if md > mdtrans and mr <= 0.1:
          pdftype = 'chi-square'
          pdftypelab = 'X'
-         dof_g = 2. / mg**2			# DoF for chi^2 pdf 
+         dof_g = 2. / mg**2         # DoF for chi^2 pdf 
 
-    if scattype == 'transition':	# 
+    if scattype == 'transition':    # 
          stypelab = 'T'
          pdftype = 'gamma-gamma'
          pdftypelab = 'GG'
 
-    if scattype == 'weak':		# log-normal PDF 
+    if scattype == 'weak':      # log-normal PDF 
          stypelab = 'W'
          mg = mgp * source_size_factor
          sigma = np.sqrt(np.log(1.+mg**2))
@@ -457,7 +457,7 @@ def calc_pdfg_for_xgal_los(RF, BW, RF_input, TAU, THETA_X, Deff, SM,
     if pdftype == 'chi-square':
        pdflabel = r'$\chi^2_{\rm n}$'
        loc = 0.
-       scale = 1. / dof_g		# gives pdf of reduced chi-square quantity
+       scale = 1. / dof_g       # gives pdf of reduced chi-square quantity
        gpdf = chi2.pdf(gvec, dof_g, loc, scale) 
        gcdf = (np.cumsum(wvec*gpdf) + chi2.pdf(dg/2., dof_g, loc, scale)) * dg
        
@@ -606,15 +606,15 @@ def main(l, b, RF, BW, dxgal_mpc, theta_source, SM, DMmodel, doplot=False):
       
     print(\
        "%6.1f %5.1f %4.1f %4.1f %7.1f %7.1f %6.3e %6.2f %4.1e %5.2f \
-	   %8.4e %8.2f %5.2f %5.2f %5.2f %4.3e %6.3e %6.3e %6.3e %5.3f \
-	   %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f \
-	   %2s %2s"\
-	   %(l, b, RF, BW, NU_T, DMmodel, THETA_ISO_RF*1000., THETA_X_RF, \
+       %8.4e %8.2f %5.2f %5.2f %5.2f %4.3e %6.3e %6.3e %6.3e %5.3f \
+       %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f \
+       %2s %2s"\
+       %(l, b, RF, BW, NU_T, DMmodel, THETA_ISO_RF*1000., THETA_X_RF, \
          SM, Deff, SBW_RF, phiF, np.log10(rF), np.log10(lr), np.log10(ld), \
          bandwidth_factor, mr, md, mg, gmedian,\
-	     g80low, g80high,g90low, g90high, g98low, g98high, \
+         g80low, g80high,g90low, g90high, g98low, g98high, \
          g998low, g998high,g9998low, g9998high,\
-	     stypelab, pdftypelab), file=fout) 
+         stypelab, pdftypelab), file=fout) 
 
     print( "DM = ", DMmodel)
     print( "SM = ", SM)
@@ -831,7 +831,7 @@ if __name__ == "__main__":
     narg=0
     print(sys.argv)
     for arg in sys.argv:
-	    #print narg, arg
+        #print narg, arg
         if  narg == 1: l = float(arg)
         if narg == 2: b = float(arg)
         if narg == 3: RF = float(arg) 

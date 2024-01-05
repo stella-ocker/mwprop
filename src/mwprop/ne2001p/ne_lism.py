@@ -6,12 +6,12 @@ ne_lism.py
 Local interstellar medium functions
 
 Replacements for Fortran functions in neLISM.NE2001.f:
-	ne_LISM(x,y,z,FLISM,wLISM)      ! total local ISM 
-	neLDRQ1(x,y,z,FLDRQ1r,wLDRQ1)   ! Low Density Region in Q1
-	neLSB(x,y,z,FLSBr,wLSB)	        ! Local Super Bubble
-	neLHB(x,y,z,FLHBr,wLHB)	        ! Local Hot Bubble [not used]
-	neLHB2(x,y,z,FLHBr,wLHB)	    ! Local Hot Bubble
-	neLOOPI(x,y,z,FLOOPI,wLOOPI)    ! Loop I
+    ne_LISM(x,y,z,FLISM,wLISM)      ! total local ISM 
+    neLDRQ1(x,y,z,FLDRQ1r,wLDRQ1)   ! Low Density Region in Q1
+    neLSB(x,y,z,FLSBr,wLSB)         ! Local Super Bubble
+    neLHB(x,y,z,FLHBr,wLHB)         ! Local Hot Bubble [not used]
+    neLHB2(x,y,z,FLHBr,wLHB)        ! Local Hot Bubble
+    neLOOPI(x,y,z,FLOOPI,wLOOPI)    ! Loop I
 
 Python version JMC 2020 Jan 27
 

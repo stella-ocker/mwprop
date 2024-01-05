@@ -78,7 +78,7 @@ if __name__ == '__main__':
         classic = True
 
     if do_plotting and calc_scattering:
-    	do_analysis = True # required for scattering plots
+        do_analysis = True # required for scattering plots
 
     Dn, Dv, Du, Dd = ne2001(ldeg, bdeg, dmd, ndir, 
         classic=classic, verbose=verbose, dmd_only=dmd_only, 

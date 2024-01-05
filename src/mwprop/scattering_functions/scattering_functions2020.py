@@ -111,9 +111,9 @@ def scintime(sm, nu, vperp=100):
     calculates the scintillation speed for given distance, galactic
     longitude and latitude, frequency, and transverse velocity      
      
-    input:   sm = scattering measure	(kpc m^{-20/3})
-             nu = radio frequency 	(GHz)
-          vperp = psr transverse speed  	(km/s)  
+    input:   sm = scattering measure    (kpc m^{-20/3})
+             nu = radio frequency   (GHz)
+          vperp = psr transverse speed      (km/s)  
                   (default 100)
      
     output: scintime = scintillation time (sec)
@@ -133,9 +133,9 @@ def specbroad(sm, nu, vperp):
     calculates the bandwdith of spectral broadening
     for given scattering measure, , frequency, and transverse velocity      
      
-    input:   sm = scattering measure	(kpc m^{-20/3})
-             nu = radio frequency 	(GHz)
-          vperp = psr transverse speed  	(km/s)  
+    input:   sm = scattering measure    (kpc m^{-20/3})
+             nu = radio frequency   (GHz)
+          vperp = psr transverse speed      (km/s)  
      
     output: specbroad = spectral broadening bandwidth (Hz)
     
@@ -149,7 +149,7 @@ def specbroad(sm, nu, vperp):
     a new calculation consistent with Cordes & Rickett (1998)
     """
 
-    specbroad = 0.097 * nu**(-1.2) * sm**0.6 * (vperp/100.)	# Hz
+    specbroad = 0.097 * nu**(-1.2) * sm**0.6 * (vperp/100.) # Hz
     return specbroad
  
  
@@ -226,8 +226,8 @@ def theta_iso(smiso, nu):
 
     \theta_{iso} = \delta r_s / d
                  = \left[
-     	                 (\lambda r_e)^2 f_{\alpha} SM_{iso}
-     		      \right]^{1/\alpha}
+                         (\lambda r_e)^2 f_{\alpha} SM_{iso}
+                  \right]^{1/\alpha}
     where \alpha = 5/3 for Kolmogorov case.
     NB SM_{iso} = \int_0^d ds s^{\alpha} \cnsq
        so SM_{iso} does not have the units of scattering
@@ -249,10 +249,10 @@ def theta_iso(smiso, nu):
         - 1.1676 \
         - 0.6 * alog10(smiso) \
         - 34.383 \
-        + 8.					
+        + 8.                    
 
     # log10(microarsec/rad) = 11.314425
-    theta_log_microarcsec = theta_log_radian + 11.314425	
+    theta_log_microarcsec = theta_log_radian + 11.314425    
     theta_iso = 10.**theta_log_microarcsec
     return theta_iso
 
@@ -281,7 +281,7 @@ def transition_frequency(sm, smtau, smtheta, dintegrate):
     """
 
     xi= 0.3989                  # (2.*pi)^{-1/2} = fresnel scale definition factor
-    coefficient=318.	        # GHz; see NE2001 paper
+    coefficient=318.            # GHz; see NE2001 paper
     deff = (dintegrate*(sm - smtau/6. - smtheta/3.)) / sm 
     transition_frequency \
          = coefficient * xi**(10./17.) * sm**(6./17.) * deff**(5./17.) 

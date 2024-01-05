@@ -17,7 +17,7 @@ msun = 1.9884754153381438e+33
 
 # fundamental
 eV = constants.eV / constants.erg
-c = constants.c *  100.  		# cm
+c = constants.c *  100.         # cm
 r_e = constants.physical_constants['classical electron radius'][0]*100. # cm
 m_e = constants.constants.m_e*1000
 e_e = sqrt(m_e * c**2 * r_e)
@@ -31,7 +31,7 @@ hbar = constants.hbar / constants.erg
 
 cm_in_m = 100.
 km = 1.e5                       # cm
-au = constants.au * 100. 		# cm
+au = constants.au * 100.        # cm
 pc = constants.parsec * 100.    # cm
 kpc = 1000.*pc
 kpc = 1.e3*pc

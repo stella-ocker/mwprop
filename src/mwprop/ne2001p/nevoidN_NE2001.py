@@ -8,28 +8,28 @@ at position designated by l,b,d,x,y,z c for a set of
 voids with parameters read in from file  nevoidN.dat
 
 input:
-	x,y,z	coordinates	(kpc)  (as in TC93)
+    x,y,z   coordinates (kpc)  (as in TC93)
 
 output:
-	nevN	electron density in void at (x,y,z)
-	FvN	fluctuation parameter
- 	hitvoid =   0:     no void hit
-		        j>0:   j-th void hit
-	wvoid = 0,1:	 void weight	
+    nevN    electron density in void at (x,y,z)
+    FvN fluctuation parameter
+    hitvoid =   0:     no void hit
+                j>0:   j-th void hit
+    wvoid = 0,1:     void weight    
 
 parameters:
-	lv	= galactic longitude of void center
-	bv	= galactic latitude of void center
-	dv	= distance from Sun of void center
-	(xv,yv,zv) = void center location (calculated)
-        nev	= internal peak electron density
+    lv  = galactic longitude of void center
+    bv  = galactic latitude of void center
+    dv  = distance from Sun of void center
+    (xv,yv,zv) = void center location (calculated)
+        nev = internal peak electron density
         Fv      = void fluctuation parameter
-	aav	= void major axis at 1/e
-	bbv	= void minor axis at 1/e
-	ccv	= void minor axis at 1/e
-	thvy	= rotation axis of void about y axis
-	thvz	= rotation axis of void about z axis
-	edgev   = 0 => use exponential rolloff out to 5rc
+    aav = void major axis at 1/e
+    bbv = void minor axis at 1/e
+    ccv = void minor axis at 1/e
+    thvy    = rotation axis of void about y axis
+    thvz    = rotation axis of void about z axis
+    edgev   = 0 => use exponential rolloff out to 5rc
                  1 => uniform and truncated at 1/e
 Version history:
 

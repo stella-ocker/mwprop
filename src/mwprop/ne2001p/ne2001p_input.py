@@ -32,7 +32,7 @@ def read_ne2001_parameters():
     negcfile = inpdir + 'ne_gc.inp'
     nelismfile = inpdir +'nelism.inp'
 
-    clumpfile = inpdir + 'neclumpN.NE2001.dat'	
+    clumpfile = inpdir + 'neclumpN.NE2001.dat'  
     voidfile = inpdir + 'nevoidN.NE2001.dat'
 
     # --------------------------------------------------------------------
