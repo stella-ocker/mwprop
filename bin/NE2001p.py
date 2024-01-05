@@ -77,16 +77,9 @@ if __name__ == '__main__':
     else:
         classic = True
 
-    if do_analysis or do_plotting: # make directory for output files
-        try:
-            os.mkdir(os.getcwd()+'/output_ne2001p')
-        except FileExistsError:
-            pass
-
-
     Dn, Dv, Du, Dd = ne2001(ldeg, bdeg, dmd, ndir, 
         classic=classic, verbose=verbose, dmd_only=dmd_only, 
-        do_analysis=True, plotting=do_plotting, debug=debug)
+        do_analysis=do_analysis, plotting=do_plotting, debug=debug)
 
     if calc_scattering and do_plotting:
         output_dir = os.getcwd()+'/output_ne2001p/'
