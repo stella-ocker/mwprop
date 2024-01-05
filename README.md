@@ -16,7 +16,7 @@ With pip:
 
 `pip install mwprop`
 
-With GitHub: [github.com/stella-ocker/mwprop](https://github.com/stella-ocker/mwprop).\
+With GitHub: [github.com/stella-ocker/mwprop](https://github.com/stella-ocker/mwprop).
 
 Executable scripts `NE2001p.py` and `los_diagnostics.py` are automatically installed with pip and may be run as executables from the command line in any directory.
 
