@@ -17,7 +17,8 @@ With pip:
 `pip install mwprop`
 
 With GitHub: [github.com/stella-ocker/mwprop](https://github.com/stella-ocker/mwprop).\
-Standalone scripts `NE2001p.py` and `los_diagnostics.py` are provided under the /bin/ directory. These scripts require `mwprop` to be installed. 
+
+Executable scripts `NE2001p.py` and `los_diagnostics.py` are automatically installed with pip and may be run as executables from the command line in any directory.
 
 **Dependencies**
 - python >= 3.6 (might work with python >= 3.0)
@@ -69,7 +70,7 @@ Forward plan:
 
 ## Usage:
 
-Command Line Usage: `python NE2001p.py ldeg bdeg dmd ndir [-options]`
+Command Line Usage: `NE2001p.py ldeg bdeg dmd ndir [-options]`
 
 Required arguments:  ldeg bdeg dmd ndir     (Same as Fortran version)
 
@@ -136,10 +137,10 @@ In analysis and plotting modes, output files are saved to a folder called 'outpu
 Plots electron density, DM, and C_n^2 along the line of sight designated by l, b, DM or d, and ndir = 1 or -1 (as with NE2001).
 Also shows the line of sight projected onto the Galactic plane along with spiral arms used in NE2001.
 
-The code can be downloaded from this repository under /bin/ but can be run from any directory, if `mwprop` is fully installed. Outputs are saved to a folder created in the user's working directory.
+This code can be run from any directory if `mwprop` is fully installed. Outputs are saved to a folder created in the user's working directory. 
 
     >>> Usage:
-    >>> python los_diagnostics.py  l  b  dmd  ndir   
+    >>> los_diagnostics.py  l  b  dmd  ndir   
     >>> with l, b in deg, dmd = DM (pc/cc) or distance (kpc) for ndir > or < 0
     >>> [same scheme as input to NE2001]
 
