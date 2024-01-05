@@ -181,12 +181,12 @@ if __name__ == '__main__':
 
     except SystemExit:
         print('Try again with inputs:')
-        print('    Use  python los_diagnostics.py  l       b     DM_D ndir   with DM_D = DM or distance for ndir > or < 0')
-        print('    e.g. python los_diagnostics.py 57.51 -0.29   71.02   1    for B1937+21 parameters')
+        print('    Use  los_diagnostics.py  l       b     DM_D ndir   with DM_D = DM or distance for ndir > or < 0')
+        print('    e.g. los_diagnostics.py 57.51 -0.29   71.02   1    for B1937+21 parameters')
         sys.exit()
 
     # Get output DM or d  from NE2001:
-    xx = NE2001.ne2001(ldeg, bdeg, dmd, ndir, classic=False, do_analysis=True)
+    xx = NE2001.ne2001(ldeg, bdeg, dmd, ndir, classic=False, dmd_only=False, do_analysis=True)
 
     if ndir > 0:                # DM -> D
         DM = xx[1]['DM']
