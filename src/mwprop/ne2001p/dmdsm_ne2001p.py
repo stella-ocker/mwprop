@@ -43,7 +43,7 @@ import time
 import sys,os
 
 script_path = os.path.dirname(os.path.realpath(__file__))
-basename = sys.argv[0].split('.')[0]
+basename = sys.argv[0].split('/')[-1].split('.')[0]
 now = datetime.datetime.now()
 plotstamp = basename + '_' + str(now).split('.')[0]
 
