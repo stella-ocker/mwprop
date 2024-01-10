@@ -146,9 +146,10 @@ This code can be run from any directory if `mwprop` is fully installed. Outputs 
 
 Example plots:
 
-![ne_vs_d_arms_57 0_-0 3_71_los_diagnostics](https://github.com/stella-ocker/mwprop_dev/assets/18332078/18ac4f32-e531-4d09-8d2c-4ae7088b7b1b)
 
-![dm_ne_cn2_l_b_dmmax_57 0_-0 3_71_los_diagnostics](https://github.com/stella-ocker/mwprop_dev/assets/18332078/e8abf090-7705-495c-880d-11467f661437)
+![ne_vs_d_arms_570_-03_71_los_diagnostics](https://github.com/stella-ocker/mwprop/example_output/ne_vs_d_arms_570_-03_71_los_diagnostics.jpg)
+
+![dm_ne_cn2_l_b_dmmax_570_-03_71_los_diagnostics](https://github.com/stella-ocker/mwprop/example_output/dm_ne_cn2_l_b_dmmax_570_-03_71_los_diagnostics.jpg)
 
 
 
