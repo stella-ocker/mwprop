@@ -4,7 +4,7 @@ Jan 2024 v1.0
 
 MWPROP provides `NE2001p`, a native Python implementation of the original Fortran code for NE2001. The package also contains a required `scattering_functions` module. NE2001p is accessible from the command line, similar to the Fortran code, or within Python scripts (see below). Future package releases will include additional modules for extensions of the NE2001 model. 
 
-Please cite the NE2001p research note [arXiv/RNAAS DOI TBD] for use of this package.\
+Please cite the NE2001p research note [Ocker & Cordes (2024)](https://doi.org/10.3847/2515-5172/ad1bf1) for use of this package.\
 The NE2001 model is described in detail in [Cordes & Lazio (2002; ](https://arxiv.org/abs/astro-ph/0207156)[2003)](https://arxiv.org/abs/astro-ph/0301598). 
 
 
@@ -16,9 +16,9 @@ With pip:
 
 `pip install mwprop`
 
-With GitHub: [github.com/stella-ocker/mwprop](https://github.com/stella-ocker/mwprop).
+On GitHub: [github.com/stella-ocker/mwprop](https://github.com/stella-ocker/mwprop).
 
-Executable scripts `NE2001p.py` and `los_diagnostics.py` are automatically installed with pip and may be run as executables from the command line in any directory.
+Executable scripts `NE2001p.py` and `los_diagnostics.py` are automatically installed with pip and may be run from the command line in any directory.
 
 **Dependencies**
 - python >= 3.6 (might work with python >= 3.0)
@@ -53,7 +53,7 @@ Differences:
 6.  Components with small scale structure (local ISM, Galactic center, clumps, voids)
     are sampled directly on a fine grid.
 7.  Different routines are used for execution to find distance from DM and for DM from distance.
-    This is transparent to the user. [Specify treatment for target DM > terminal DM]
+    Cases where the DM exceeds the maximum Galactic value will return a warning; distances predicted for these cases are unreliable (see Ocker & Cordes 2024).
 8.  Config file:  code imports,  reading parameter files, and setting key values
     (like the Sun-GC distance = 8.5 kpc) are done by importing mwprop.ne2001p.config_ne2001p  
     Note the 8.5 kpc distance is needed because model parameters were determined using
