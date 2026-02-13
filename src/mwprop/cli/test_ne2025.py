@@ -12,9 +12,7 @@ from mwprop.nemod import *
 from mwprop.nemod.NE2025 import ne2025
 
 
-if __name__ == '__main__':
-
-
+def main():
 	# J0323+3944, D_obs = 0.95, DM_obs = 26.19
 	test_gl = 152.180
 	test_gb = -14.338
@@ -51,4 +49,5 @@ if __name__ == '__main__':
 		print('Error: cannot find expected output (DM->D)')
 
 
-
+if __name__ == '__main__':
+	main()

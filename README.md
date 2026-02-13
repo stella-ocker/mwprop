@@ -22,7 +22,7 @@ With pip:
 
 On GitHub: [github.com/stella-ocker/mwprop](https://github.com/stella-ocker/mwprop).
 
-Executable scripts `NE2025p.py`, `NE2001p.py`, `los_diagnostics.py`, and `test_ne2025p.py` are automatically installed with pip and may be run from the command line in any directory. 
+Executable scripts `NE2025p`, `NE2001p`, `los_diagnostics`, and `test_NE2025p` are automatically installed with pip and may be run from the command line in any directory. 
 
 **Dependencies**
 - python >= 3.6 (might work with python >= 3.0)
@@ -75,7 +75,7 @@ The Python implementation is about 45 times slower than in Fortran. For computat
 
 ## Python Usage:
 
-Command Line Usage: `NE2025p.py ldeg bdeg dmd ndir [-options]`
+Command Line Usage: `NE2025p ldeg bdeg dmd ndir [-options]`
 
 Required arguments:  ldeg bdeg dmd ndir     (Same as Fortran version)
 
@@ -134,11 +134,11 @@ iPython Example:
 
 In analysis and plotting modes, output files are saved to a folder called 'output_ne2025p' or 'output_ne2001p' (depending on the function called) in the user's working directory. 
 
-v2.0 introduces warnings when a clump or void is intersected in the model. Warnings can be turned off using warnings.filterwarnings(). Users can see a detailed breakdown of clump and void contributions by running the `los_diagnostics.py` script described below. While not generally recommended, users can turn clumps or voids off completely by setting the weight parameters wgcN and wgvN to 0 in the params/gal25.inp file (which requires recompiling the Python package). 
+v2.0 introduces warnings when a clump or void is intersected in the model. Warnings can be turned off using warnings.filterwarnings(). Users can see a detailed breakdown of clump and void contributions by running the `los_diagnostics` script described below. While not generally recommended, users can turn clumps or voids off completely by setting the weight parameters wgcN and wgvN to 0 in the params/gal25.inp file (which requires recompiling the Python package). 
 
 -----
     
-## Diagnostic code los_diagnostics.py
+## Diagnostic code los_diagnostics
 
 
 Plots electron density, DM, and C_n^2 along the line of sight designated by l, b, DM or d, and ndir = 1 or -1 (as with NE2001).
@@ -147,7 +147,7 @@ Also shows the line of sight projected onto the Galactic plane along with spiral
 This code can be run from any directory if `mwprop` is fully installed. Outputs are saved to a folder created in the user's working directory. 
 
     Usage:
-    los_diagnostics.py  l  b  dmd  ndir  v
+    los_diagnostics  l  b  dmd  ndir  v
     with l, b in deg, dmd = DM (pc/cc) or distance (kpc) for ndir > or < 0, v = 2025 or 2001 for NE2025 or NE2001
 
 Example plots (run with v=2001):
@@ -160,7 +160,7 @@ Example plots (run with v=2001):
 
 -----
 
-## test_ne2025p.py
+## test_NE2025p
 
 Users wishing to test if the Python installation behaves as expected may also run this executable script from any command line. A specific sightline is evaluated and compared to expected values, and the percent errors between the expected and calculated parameters are printed.
 

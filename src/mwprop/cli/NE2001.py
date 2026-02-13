@@ -14,9 +14,7 @@ eval_NE2001 = True
 from mwprop import nemod
 from mwprop.nemod.NE2001 import *
 
-
-if __name__ == '__main__':
-
+def main():
     # If 'explain' option is set, print out README file and exit.
     if '-e' in sys.argv or '--explain' in sys.argv:
         try:
@@ -60,7 +58,7 @@ if __name__ == '__main__':
 
     except SystemExit:
         print('Try again with inputs')
-        print('Use NE2001p.py -e to get explanation of code')
+        print('Use NE2001p -e to get explanation of code')
         sys.exit()
 
     ldeg = float(args.l)
@@ -96,3 +94,6 @@ if __name__ == '__main__':
 
         input('hit return')
         close('all')
+
+if __name__ == '__main__':
+    main()

@@ -15,15 +15,20 @@ Can vary Ncoarse = number of coarse samples along the LoS to test precision:
 JMC 2024 Jan 3 
 """
 
-from matplotlib.pyplot import suptitle
+from matplotlib.pyplot import *
 from numpy import *
+import numpy as np
+if int(np.__version__[0]) >=2:
+    from numpy import trapezoid as trapz
+else:
+    from numpy import trapz
 import argparse
 import sys,os
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 basename = sys.argv[0].split('/')[-1].split('.')[0]         # for plot file name
 
-def plot_ne_arms():
+def plot_ne_arms(s25,ne25,s,ne_lism_vec,nea_vec,ne1_vec,ne2_vec,DM,d,ldeg,bdeg,Darms,armarray,rsun,xvec,yvec,Armvec,ndir):
     # Plotting
     # ------------------------------------------------------------------
     # Three panel plot with n_e vs s, spiral arms, and arm number vs LoS
@@ -82,7 +87,7 @@ def plot_ne_arms():
     #show()
     return
    
-def plot_dm_ne_cn2():
+def plot_dm_ne_cn2(s25,dm25,ne25,Cn2_vs_s25,ldeg,bdeg,DMmax,dbar_ne,dbar_ne2,deffsm2):
     # ----------------------------------
     # Three panels with DM, n_e, and Cn2
     # ----------------------------------
@@ -117,9 +122,7 @@ def plot_dm_ne_cn2():
     return
 
 # Main
-
-if __name__ == '__main__':
-
+def main():
     try:
         parser = argparse.ArgumentParser(
             description='Plot NE20x diagnostics for designated line of sight)')
@@ -198,7 +201,7 @@ if __name__ == '__main__':
         xx = ne2025(ldeg, bdeg, dmd, ndir, classic=False, dmd_only=False, do_analysis=True)
 
     import mwprop.nemod.config_nemod as config_nemod
-    from mwprop.nemod.density_components import *
+    from mwprop.nemod.density_components import ne_outer, ne_inner, ne_gc
     import mwprop.nemod.ne_arms as ne_arms 
     import mwprop.nemod.density_components as dc
     import mwprop.nemod.density as ne01
@@ -226,6 +229,7 @@ if __name__ == '__main__':
     ne_arms.Darmmap = Darmmap
     ne_arms.armmap = armmap
     ne_arms.Dgal01 = Dgal01
+    rsun = 8.5
     
     s = np.linspace(0, d, int(d/ds))
     xvec, yvec, zvec =  s*np.sin(l), rsun-s*np.cos(l), s*np.sin(b)  
@@ -268,22 +272,22 @@ if __name__ == '__main__':
     DMmax = dm25.max()
 
     # Effective distances based on LoS integrals weighted by various functions of n_e:
-    dbar_ne = np.trapz(s25*ne25, s25) / np.trapz(ne25, s25)
-    dbar_ne2 = np.trapz(s25*ne25**2, s25) / np.trapz(ne25**2, s25)
-    deffsm2 =  np.trapz(s25*Cn2_vs_s25, s25) / np.trapz(Cn2_vs_s25, s25)
+    dbar_ne = trapz(s25*ne25, s25) / trapz(ne25, s25)
+    dbar_ne2 = trapz(s25*ne25**2, s25) / trapz(ne25**2, s25)
+    deffsm2 =  trapz(s25*Cn2_vs_s25, s25) / trapz(Cn2_vs_s25, s25)
 
     # Cumulative DM and SM: not currently used, so commented out; may use later so keep.
     #DMvec = 1000.*np.array([np.trapz(ne25[:j], s25[:j]) for j in range(np.size(s25))])
     #SMvec = np.array([np.trapz(Cn2_vs_s25[:j], s25[:j]) for j in range(np.size(s25))])
 
 
-    plot_ne_arms()
+    plot_ne_arms(s25,ne25,s,ne_lism_vec,nea_vec,ne1_vec,ne2_vec,DM,d,ldeg,bdeg,Darms,armarray,rsun,xvec,yvec,Armvec,ndir)
     plotfile = 'ne_vs_d_arms_' + '%6.1f'%(ldeg) + '_' + '%5.1f'%(bdeg) + '_' + str(int(DMmax)) + '_' +  basename + '.pdf'
     plotfile = plotfile.replace(' ', '')
     savefig(plotdir+plotfile)
     show()
 
-    plot_dm_ne_cn2()
+    plot_dm_ne_cn2(s25,dm25,ne25,Cn2_vs_s25,ldeg,bdeg,DMmax,dbar_ne,dbar_ne2,deffsm2)
     plotfile = 'dm_ne_cn2_l_b_dmmax_' + '%6.1f'%(ldeg) + '_' + '%5.1f'%(bdeg) + '_' + str(int(DMmax)) + '_' +  basename + '.pdf'
     plotfile = plotfile.replace(' ', '')
     savefig(plotdir+plotfile)
@@ -291,3 +295,6 @@ if __name__ == '__main__':
     
     input('hit return')
     close('all')
+
+if __name__ == '__main__':
+	main()
