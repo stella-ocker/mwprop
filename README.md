@@ -162,7 +162,7 @@ Example plots (run with v=2001):
 
 ## test_ne2025p.py
 
-Users wishing to test if the Python installation behaves as expected may also run this executable script from any command line. A specific sightline is evaluated and compared to expected values, and the percent error between the expected and calculated parameters are printed.
+Users wishing to test if the Python installation behaves as expected may also run this executable script from any command line. A specific sightline is evaluated and compared to expected values, and the percent errors between the expected and calculated parameters are printed.
 
 -----
 
