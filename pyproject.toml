@@ -1,6 +1,45 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
-]
+requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+urls = { Homepage = "https://github.com/stella-ocker/mwprop", Issues = "https://github.com/stella-ocker/mwprop/issues" }
+
+
+name = "mwprop"
+version = "2.0.0"
+description = "A Python package for NE2025 and NE2001"
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.8"
+authors = [
+    { name = "James Cordes" },
+    { name = "Stella Ocker", email = "stella.ocker@gmail.com" },
+]
+license = { text = "GPL-3.0-or-later" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "astropy>=5.2.2",
+    "matplotlib>=3.7.5",
+    "mpmath>=1.3.0",
+    "numpy>=1.24.4",
+    "scipy>=1.10.1",
+]
+[project.scripts]
+NE2025p = "mwprop.bin.NE2025p:main"
+NE2001p = "mwprop.bin.NE2001p:main"
+los_diagnostics = "mwprop.bin.los_diagnostics:main"
+test_ne2025p = "mwprop.bin.test_ne2025p:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["*.txt", "params/*"]
