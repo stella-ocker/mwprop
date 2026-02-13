@@ -1,10 +1,10 @@
 #!/usr/bin/perl
-# 15 May 2002
+# 15 May 2002; updated 13 Feb 2026
 # General version: command-line input includes field wanted 
 $nargs = ($#ARGV + 1);
 if($nargs < 5) {
    print "Usage:\n"; 
-   print "	run_NE2001      l    b       DM/D         ndir    field \n"; 
+   print "	run_NE2025      l    b       DM/D         ndir    field \n"; 
    print "	               deg  deg    pc-cm^{-3}     1,-1    D etc \n";
    print "	                           or kpc \n";
    print "	Possible Fields (case insensitive):\n";
@@ -20,8 +20,8 @@ if($nargs == 5) {
    $FIELD = uc($field);
 }
 #print "$field $FIELD\n";
-$bindir = "./run_NE2001/";
-open(TEMP02, "$bindir/NE2001 $l $b  $DMD  $ndir | ") || die "Couldn't run NE2001: $!\n";
+$bindir = "./run_NE2025/";
+open(TEMP02, "$bindir/NE2025 $l $b  $DMD  $ndir | ") || die "Couldn't run NE2025: $!\n";
 while (<TEMP02>) {
 	if ($field eq "ALL" || $field eq "all") {print};
 	if (/\s+$field\s+/ || /\s+$FIELD\s+/ ) {
