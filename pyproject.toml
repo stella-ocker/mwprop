@@ -29,10 +29,10 @@ dependencies = [
     "scipy>=1.10.1",
 ]
 [project.scripts]
-NE2025p = "mwprop.bin.NE2025p:main"
-NE2001p = "mwprop.bin.NE2001p:main"
-los_diagnostics = "mwprop.bin.los_diagnostics:main"
-test_ne2025p = "mwprop.bin.test_ne2025p:main"
+NE2025p = "mwprop.cli.NE2025:main"
+NE2001p = "mwprop.cli.NE2001:main"
+los_diagnostics = "mwprop.cli.los_diagnostics:main"
+test_NE2025p = "mwprop.cli.test_ne2025:main"
 
 [tool.setuptools]
 package-dir = { "" = "src" }

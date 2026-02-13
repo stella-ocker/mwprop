@@ -117,9 +117,7 @@ def plot_dm_ne_cn2():
     return
 
 # Main
-
-if __name__ == '__main__':
-
+def main():
     try:
         parser = argparse.ArgumentParser(
             description='Plot NE20x diagnostics for designated line of sight)')
@@ -291,3 +289,6 @@ if __name__ == '__main__':
     
     input('hit return')
     close('all')
+
+if __name__ == '__main__':
+    main()
