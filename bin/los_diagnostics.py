@@ -17,6 +17,11 @@ JMC 2024 Jan 3
 
 from matplotlib.pyplot import suptitle
 from numpy import *
+import numpy as np
+if int(np.__version__[0]) >=2:
+    from numpy import trapezoid as trapz
+else:
+    from numpy import trapz
 import argparse
 import sys,os
 
