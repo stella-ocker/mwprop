@@ -1,4 +1,4 @@
-# mwprop.ne2001p v1.0 Jan 2024
+# mwprop v2.0 Jan 2026
 
 """
 Python versions of functions in scattering98.f that is
@@ -9,6 +9,8 @@ part of the NE2001 Fortran package
 Added: 
     transition_frequency_from_obs
     sm_from_tau
+
+2026 Feb 2: Moved tau_x calculation here
 ------
 Notes in 1998-2001 Fortran version: 
 This version from 18 March 1998 uses revised coefficients 
@@ -464,6 +466,22 @@ def sm_from_thetad_plane_wave_width_method(nu, thetad, si=11./3.):
        / SMunit
     return SM
 
+def taux_from_thetax(d_mod,sm,smtau,smtheta,theta_x,tau,sbw):
+
+	# Effective distance to dominant scattering  
+    deffsm2 = d_mod*(sm - smtau/6. - smtheta/3.)/sm     
+
+    # Alternative for extragalactic temporal broadening
+    fwhm2sigma = 1. / sqrt(8.*np.log(2.))
+    #taufactor = (((mas*fwhm2sigma)**2 * kpc) / (2.*c)) *  1000. # old - spurious factor of 2
+    taufactor = (((mas*fwhm2sigma)**2 * kpc) / (c)) *  1000. # new - factor of 2 removed
+
+    tau_x = taufactor * deffsm2 * theta_x**2            # ms
+    sbw_x = sbw * tau / tau_x                           # MHz
+
+    return tau_x,sbw_x,deffsm2
+
+
 def sm_from_tau(nu, tau, Deff, si=11./3.):
     """
     Calculates SM from pulse broadening time and (effective) distance. 
@@ -478,4 +496,3 @@ def sm_from_tau(nu, tau, Deff, si=11./3.):
 
     # NEED TO FINISH THIS
 
-    

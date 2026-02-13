@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# mwprop.ne2001p v1.0 Jan 2024
+# mwprop v2.0 Jan 2026
 
 
 """
@@ -16,20 +16,9 @@ JMC 2024 Jan 3
 """
 
 from matplotlib.pyplot import suptitle
-
-import mwprop.ne2001p.NE2001 as NE2001
-
-import mwprop.ne2001p.config_ne2001p as config_ne2001p
+from numpy import *
 import argparse
-
-from mwprop.ne2001p.density_components import *
-import mwprop.ne2001p.ne_arms_ne2001p as ne_arms 
-
-import mwprop.ne2001p.density_components as dc
-import mwprop.ne2001p.density_ne2001 as ne01
-import mwprop.ne2001p.ne_lism as lism
-import mwprop.ne2001p.neclumpN_NE2001_fast as necf
-import mwprop.ne2001p.nevoidN_NE2001 as nev
+import sys,os
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 basename = sys.argv[0].split('/')[-1].split('.')[0]         # for plot file name
@@ -133,7 +122,7 @@ if __name__ == '__main__':
 
     try:
         parser = argparse.ArgumentParser(
-            description='Plot NE2001 diagnostics for designated line of sight)')
+            description='Plot NE20x diagnostics for designated line of sight)')
 
         """
         parser.add_argument('-l', '--l', default=57.51, help='Galactic longitude (deg)')
@@ -146,6 +135,7 @@ if __name__ == '__main__':
         parser.add_argument('b', help='Galactic latitude (deg)')
         parser.add_argument('DM_D', help='DM (pc cm^{-3}) or distance (kpc)')
         parser.add_argument('ndir', help='ndir = 1 (DM->D), ndir = -1 (D->DM)')
+        parser.add_argument('v', default=2025,  help='v = 2025 (NE2025, default), v = 2001 (NE2001)')
 
         # Default values for sampling along the line of sight: less likely to need change. 
         Ncoarse_def = 50
@@ -163,14 +153,20 @@ if __name__ == '__main__':
         ndir = int(args.ndir)
         Ncoarse = int(args.Ncoarse)
         ds = float(args.ds)
+        v = int(args.v)
 
         l, b = deg2rad((ldeg, bdeg))
 
-        # Directory for reading the f25 file written by NE2001 (from call below)
-        f25dir = os.getcwd()+'/output_ne2001p/'
-
-        # Plot directory (same as f25dir here):
-        plotdir = os.getcwd()+'/output_ne2001p/'
+        if v==2001:
+            # Directory for reading the f25 file written by NE20x (from call below)
+            f25dir = os.getcwd()+'/output_ne2001p/'
+            # Plot directory (same as f25dir here):
+            plotdir = os.getcwd()+'/output_ne2001p/'
+        else:
+            # Directory for reading the f25 file written by NE20x (from call below)
+            f25dir = os.getcwd()+'/output_ne2025p/'
+            # Plot directory (same as f25dir here):
+            plotdir = os.getcwd()+'/output_ne2025p/'
 
         print('Line of sight diagnostics for l = %6.1f   b = %6.1f   dmd = %d   ndir = %d'%(ldeg, bdeg, dmd, ndir))
         if Ncoarse != Ncoarse_def:
@@ -181,12 +177,34 @@ if __name__ == '__main__':
 
     except SystemExit:
         print('Try again with inputs:')
-        print('    Use  los_diagnostics.py  l       b     DM_D ndir   with DM_D = DM or distance for ndir > or < 0')
-        print('    e.g. los_diagnostics.py 57.51 -0.29   71.02   1    for B1937+21 parameters')
+        print('    Use  los_diagnostics.py  l       b     DM_D ndir v  with DM_D = DM or distance for ndir > or < 0, v=2025 (NE2025) or v=2001 (NE2001)')
+        print('    e.g. los_diagnostics.py 57.51 -0.29   71.02   1 2025   for B1937+21 parameters evaluated by NE2025')
         sys.exit()
 
     # Get output DM or d  from NE2001:
-    xx = NE2001.ne2001(ldeg, bdeg, dmd, ndir, classic=False, dmd_only=False, do_analysis=True)
+    if v==2001:
+    	# set which_model.inp
+        #inpdir = os.path.dirname(os.path.realpath(__file__))+'/params/'
+        #with open(inpdir+"which_model.inp", "w") as file:
+        #    file.write("NE2001")
+        from mwprop.nemod.NE2001 import ne2001
+        xx = ne2001(ldeg, bdeg, dmd, ndir, classic=False, dmd_only=False, do_analysis=True)
+    if v==2025:
+        # set which_model.inp
+        #inpdir = os.path.dirname(os.path.realpath(__file__))+'/params/'
+        #with open(inpdir+"which_model.inp", "w") as file:
+        #    file.write("NE2025")
+        from mwprop.nemod.NE2025 import ne2025
+        xx = ne2025(ldeg, bdeg, dmd, ndir, classic=False, dmd_only=False, do_analysis=True)
+
+    import mwprop.nemod.config_nemod as config_nemod
+    from mwprop.nemod.density_components import *
+    import mwprop.nemod.ne_arms as ne_arms 
+    import mwprop.nemod.density_components as dc
+    import mwprop.nemod.density as ne01
+    import mwprop.nemod.ne_lism as lism
+    import mwprop.nemod.neclumpN_fast as necf
+    import mwprop.nemod.nevoidN as nev
 
     if ndir > 0:                # DM -> D
         DM = xx[1]['DM']
@@ -200,7 +218,7 @@ if __name__ == '__main__':
     # get spiral arm info for plotting
     Dgal01, Dgc, Dlism, Dclumps, Dvoids, Darms, Darmmap, armmap, \
            r1, th1, th1deg, coarse_arms, rarray, tharray,  armsplines, armarray, \
-           tangents, normals, curvatures = config_ne2001p.setup_spiral_arms(Ncoarse=Ncoarse)
+           tangents, normals, curvatures, eval_NE2025, eval_NE2001 = config_nemod.setup_spiral_arms(Ncoarse=Ncoarse)
 
     ne_arms.th1 = th1
     ne_arms.r1 = r1
@@ -237,13 +255,13 @@ if __name__ == '__main__':
         F_lism_vec[n] = FLISM
         wlism_vec[n] = wLISM
 
-    # Get total n_e from file f25 text file written by analysis_dmd_dm_and_sm() in dmdsm_ne2001p.py
+    # Get total n_e from file f25 text file written by analysis_dmd_dm_and_sm() in dmdsm.py
     if ndir < 0:
         f25file = 'f25_d2dm_ne_dsm_vs_s.txt'
     else:
         f25file = 'f25_dm2d_ne_dsm_vs_s.txt'
         
-    # Read f25 output file written by NE2001 into standard directory:
+    # Read f25 output file written by NE20x into standard directory:
     ldeg, bdeg = np.loadtxt(f25dir+f25file, unpack=True, usecols = (0, 1), skiprows=1, max_rows=1)
     s25, ne25, Cn2_vs_s25, dm25, nea25 = np.loadtxt(f25dir + f25file, unpack=True, usecols = (0, 4, 5, 10, 11), skiprows=3)
 

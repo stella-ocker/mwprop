@@ -8,11 +8,11 @@ except ImportError:
     # Try backported to PY<37 `importlib_resources`.
     import importlib_resources as pkg_resources
 
-eval_NE2025 = False
-eval_NE2001 = True
+eval_NE2025 = True
+eval_NE2001 = False
 
 from mwprop import nemod
-from mwprop.nemod.NE2001 import *
+from mwprop.nemod.NE2025 import *
 
 
 if __name__ == '__main__':
@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
     try:
         # parse command line arguments and execute
-        parser = argparse.ArgumentParser(description='NE2001p (mwprop v2.0) Jan 2026')
+        parser = argparse.ArgumentParser(description='NE2025p (mwprop v2.0) Jan 2026')
         parser.add_argument('l',help='Galactic longitude (deg)')
         parser.add_argument('b',help='Galactic latitude (deg)')
         parser.add_argument('DM_D',help='DM (pc cm^{-3}) or distance (kpc)')
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     except SystemExit:
         print('Try again with inputs')
-        print('Use NE2001p.py -e to get explanation of code')
+        print('Use NE2025p.py -e to get explanation of code')
         sys.exit()
 
     ldeg = float(args.l)
@@ -83,12 +83,12 @@ if __name__ == '__main__':
     if do_plotting and calc_scattering:
         do_analysis = True # required for scattering plots
 
-    Dn, Dv, Du, Dd = ne2001(ldeg, bdeg, dmd, ndir, 
+    Dn, Dv, Du, Dd = ne2025(ldeg, bdeg, dmd, ndir, 
         classic=classic, verbose=verbose, dmd_only=dmd_only, 
         do_analysis=do_analysis, plotting=do_plotting, debug=debug)
 
     if calc_scattering and do_plotting:
-        output_dir = os.getcwd()+'/output_ne2001p/'
+        output_dir = os.getcwd()+'/output_ne2025p/'
         if ndir >= 0:
             plot_dm_ne_cn2_vs_d(Dv, f25file = output_dir+'f25_dm2d_ne_dsm_vs_s.txt')
         if ndir < 0: # SKO added 12-15-23 to make output plotting work for both DM->D and D->DM

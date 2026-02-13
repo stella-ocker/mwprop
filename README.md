@@ -1,16 +1,20 @@
 # MWPROP
 
-Jan 2024 v1.0
+Feb 2026 v2.0
 
-MWPROP provides `NE2001p`, a native Python implementation of the original Fortran code for NE2001. The package also contains a required `scattering_functions` module. NE2001p is accessible from the command line, similar to the Fortran code, or within Python scripts (see below). Future package releases will include additional modules for extensions of the NE2001 model. 
+MWPROP provides `NE2025p` and `NE2001p`, native Python implementations of the original Fortran code for NE2025/NE2001. The package also contains a required `scattering_functions` module. NE2025p/NE2001p are accessible from the command line, similar to the Fortran code, or within Python scripts (see below).
 
-Please cite the NE2001p research note [Ocker & Cordes (2024)](https://doi.org/10.3847/2515-5172/ad1bf1) for use of this package.\
+The Fortran version of NE2025 is provided in the Github repository for MWPROP, along with distance and scattering data used to calibrate NE2025. See `mwprop/ne2025f`.
+
+
+Please cite Ocker & Cordes (2026) for use of NE2025.
+
+The first description of the conversion between Fortran and Python is given in the NE2001p research note [Ocker & Cordes (2024)](https://doi.org/10.3847/2515-5172/ad1bf1).\
 The NE2001 model is described in detail in [Cordes & Lazio (2002; ](https://arxiv.org/abs/astro-ph/0207156)[2003)](https://arxiv.org/abs/astro-ph/0301598). 
-
 
 -----
 
-## Installation:
+## Python Installation:
 
 With pip:
 
@@ -18,11 +22,11 @@ With pip:
 
 On GitHub: [github.com/stella-ocker/mwprop](https://github.com/stella-ocker/mwprop).
 
-Executable scripts `NE2001p.py` and `los_diagnostics.py` are automatically installed with pip and may be run from the command line in any directory.
+Executable scripts `NE2025p.py`, `NE2001p.py`, `los_diagnostics.py`, and `test_ne2025p.py` are automatically installed with pip and may be run from the command line in any directory. 
 
 **Dependencies**
 - python >= 3.6 (might work with python >= 3.0)
-- numpy
+- numpy 
 - matplotlib
 - scipy
 - astropy
@@ -30,7 +34,13 @@ Executable scripts `NE2001p.py` and `los_diagnostics.py` are automatically insta
 
 -----
 
-## Comparison to Fortran Version of NE2001:
+## Fortran Installation:
+
+The list of build commands is provided under ne2025f/README and is based on gfortran. Updating to the latest version of gcc is recommended. See ne2025f/README for further details.
+
+-----
+
+## Comparison between Python and Fortran Versions of NE2025/NE2001:
 
 The input parameters and model components for the Milky Way are identical. 
 
@@ -45,7 +55,7 @@ Differences:
         Dv = values 
         Du = units
         Dd = descriptions
-3.  Numerical integrations use numpy.trapz instead of step-by-step summing.
+3.  Numerical integrations use numpy.trapz (or numpy.trapezoid for numpy version >=2.0) instead of step-by-step summing.
 4.  Clumps are prefiltered for inclusion along a specified line of sight (LoS).
 5.  Large-scale components (thin and thick disks, spiral arms) are sampled coarsely
     (0.1 kpc default sample interval) and cubic splines are used to resample onto
@@ -55,22 +65,17 @@ Differences:
 7.  Different routines are used for execution to find distance from DM and for DM from distance.
     Cases where the DM exceeds the maximum Galactic value will return a warning; distances predicted for these cases are unreliable (see Ocker & Cordes 2024).
 8.  Config file:  code imports,  reading parameter files, and setting key values
-    (like the Sun-GC distance = 8.5 kpc) are done by importing mwprop.ne2001p.config_ne2001p  
+    (like the Sun-GC distance = 8.5 kpc) are done by importing mwprop.nemod.config_nemod
     Note the 8.5 kpc distance is needed because model parameters were determined using
     this value for the original NE2001 code. It cannot be changed by itself.
 
-NE2001p is about 45 times slower than the Fortran implementation. 
-
-Forward plan:
-1. NE2001p = this version (p for Python)
-2. NE2001x = next version (x for extended)
-3. NE202(...)  = new version, complete redefinition of components and implementation.
+The Python implementation is about 45 times slower than in Fortran. For computations requiring speed, we recommend the Fortran release.
 
 ----- 
 
-## Usage:
+## Python Usage:
 
-Command Line Usage: `NE2001p.py ldeg bdeg dmd ndir [-options]`
+Command Line Usage: `NE2025p.py ldeg bdeg dmd ndir [-options]`
 
 Required arguments:  ldeg bdeg dmd ndir     (Same as Fortran version)
 
@@ -98,14 +103,14 @@ Optional requirements and defaults:
 
 Script/iPython Usage:
 
-The ne2001() function evaluates NE2001p and can be imported from the mwprop.ne2001p.NE2001 module. The function output consists of four dictionaries: 
+The ne2025()/ne2001() functions evaluate NE2025p/NE2001p and can be imported from the mwprop.nemod.NE2025 (or mwprop.nemod.NE2001) module. The function output consists of four dictionaries: 
 
     Dk    => Dictionary keys for output values
     Dv    => Numerical output values
     Du    => Units of output values
     Dd    => Extended output description 
 
-Additional options for ne2001():
+Additional options for ne2025()/ne2001():
 
     classic = True      => print traditional Fortran output (default = True)
     dmd_only = True     => compute only DM or distance, no scattering quantities (default = False)
@@ -115,19 +120,21 @@ Additional options for ne2001():
 
 iPython Example:
 
-    >>> from mwprop.ne2001p import *
-    >>> from mwprop.ne2001p.NE2001 import ne2001
-    >>> Dk,Dv,Du,Dd = ne2001(ldeg=45,bdeg=5,dmd=50,ndir=1,classic=False)
+    >>> from mwprop.nemod import *
+    >>> from mwprop.nemod.NE2025 import ne2025
+    >>> Dk,Dv,Du,Dd = ne2025(ldeg=45,bdeg=5,dmd=50,ndir=1,classic=False)
     >>> Dk['DIST']
     'DIST'
     >>> Dv['DIST']
-    2.6366
+    3.7938
     >>> Du['DIST']
     'kpc'
     >>> Dd['DIST']
     'ModelDistance'
 
-In analysis and plotting modes, output files are saved to a folder called 'output_ne2001p' in the user's working directory. 
+In analysis and plotting modes, output files are saved to a folder called 'output_ne2025p' or 'output_ne2001p' (depending on the function called) in the user's working directory. 
+
+v2.0 introduces warnings when a clump or void is intersected in the model. Warnings can be turned off using warnings.filterwarnings(). Users can see a detailed breakdown of clump and void contributions by running the `los_diagnostics.py` script described below. While not generally recommended, users can turn clumps or voids off completely by setting the weight parameters wgcN and wgvN to 0 in the params/gal25.inp file (which requires recompiling the Python package). 
 
 -----
     
@@ -135,16 +142,15 @@ In analysis and plotting modes, output files are saved to a folder called 'outpu
 
 
 Plots electron density, DM, and C_n^2 along the line of sight designated by l, b, DM or d, and ndir = 1 or -1 (as with NE2001).
-Also shows the line of sight projected onto the Galactic plane along with spiral arms used in NE2001.
+Also shows the line of sight projected onto the Galactic plane along with spiral arms used in NE2001/NE2025.
 
 This code can be run from any directory if `mwprop` is fully installed. Outputs are saved to a folder created in the user's working directory. 
 
-    >>> Usage:
-    >>> los_diagnostics.py  l  b  dmd  ndir   
-    >>> with l, b in deg, dmd = DM (pc/cc) or distance (kpc) for ndir > or < 0
-    >>> [same scheme as input to NE2001]
+    Usage:
+    los_diagnostics.py  l  b  dmd  ndir  v
+    with l, b in deg, dmd = DM (pc/cc) or distance (kpc) for ndir > or < 0, v = 2025 or 2001 for NE2025 or NE2001
 
-Example plots:
+Example plots (run with v=2001):
 
 
 ![ne_vs_d_arms_570_-03_71_los_diagnostics](https://github.com/stella-ocker/mwprop/blob/main/example_output/ne_vs_d_arms_570_-03_71_los_diagnostics.jpg)
@@ -152,5 +158,16 @@ Example plots:
 ![dm_ne_cn2_l_b_dmmax_570_-03_71_los_diagnostics](https://github.com/stella-ocker/mwprop/blob/main/example_output/dm_ne_cn2_l_b_dmmax_570_-03_71_los_diagnostics.jpg)
 
 
+-----
 
+## test_ne2025p.py
 
+Users wishing to test if the Python installation behaves as expected may also run this executable script from any command line. A specific sightline is evaluated and compared to expected values, and the percent error between the expected and calculated parameters are printed.
+
+-----
+
+## Known Issues
+
+mwprop v1.0: Extragalactic scattering times and scintillation bandwidths (TAU_X, SBW_X) output by mwprop.ne2001p v1.0 (pre-NE2025) are too small and large (respectively) by a factor of 2. This error is corrected in v2.0.  
+
+mwprop v2.0: Two of the smallest clumps in the model (1745-2900 and OH40.6-0.2) will have large differences between the Fortran and Python outputs, due to small differences in the sampling of the numerical integration that are minor for most clumps but exaggerated when the clump size is close to the integration grid sampling. For these sightlines, use of the Fortran code is recommended.
