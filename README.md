@@ -7,7 +7,7 @@ MWPROP provides `NE2025p` and `NE2001p`, native Python implementations of the or
 The Fortran version of NE2025 is provided in the Github repository for MWPROP, along with distance and scattering data used to calibrate NE2025. See `mwprop/ne2025f`.
 
 
-Please cite Ocker & Cordes (2026) for use of NE2025.
+Please cite [Ocker & Cordes (2026)](https://arxiv.org/abs/2602.11838) for use of NE2025.
 
 The first description of the conversion between Fortran and Python is given in the NE2001p research note [Ocker & Cordes (2024)](https://doi.org/10.3847/2515-5172/ad1bf1).\
 The NE2001 model is described in detail in [Cordes & Lazio (2002; ](https://arxiv.org/abs/astro-ph/0207156)[2003)](https://arxiv.org/abs/astro-ph/0301598). 
