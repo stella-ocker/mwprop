@@ -1,3 +1,4 @@
+gal25.inp = input parameters for large-scale components of NE2025
 1 1 1 1 1 1 1 wg1 wg2 wga wggc wglism wgcN, wgvN
 n1h1:   0.0275
 h1:     1.589
