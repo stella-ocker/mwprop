@@ -6,7 +6,7 @@ density.py
 Returns the local electron density, fluctuation parameters, weights
 and clump/void flags for the position (x, y, z)
 
-Relacement for Fortran subroutine density_2001 
+Relacement for Fortran subroutine density_2001
 
 
 Comments from Fortran code density.NE2001.f
@@ -30,7 +30,7 @@ Changes:
 
 from mwprop.nemod.config_nemod import *
 
-from mwprop.nemod.density_components import * 
+from mwprop.nemod.density_components import *
 from mwprop.nemod.ne_lism import *
 from mwprop.nemod.neclumpN_fast import *
 from mwprop.nemod.nevoidN import *
@@ -40,7 +40,7 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 
 # ---------------------------------------------------------------------------
 
-def density_2001(x, y, z, inds_relevant=None, verbose=False):  
+def density_2001(x, y, z, inds_relevant=None, verbose=False):
     """
     (Edited) Comments from Fortran code:
 
@@ -85,27 +85,27 @@ def density_2001(x, y, z, inds_relevant=None, verbose=False):
     wlism=wldr=wlhb=wlsb=wloopI = hitclump = hitvoid = wvoid = whicharm = 0
 
 
-    if wg1 == 1: 
+    if wg1 == 1:
         ne1, F1 = ne_outer(x,y,z)
-    if wg2 == 1: 
+    if wg2 == 1:
         ne2, F2 = ne_inner(x,y,z)
-    if wga == 1: 
+    if wga == 1:
         nea, Fa, whicharm = ne_arms_ne2001p(x,y,z, Ncoarse=Ncoarse)
     else:
         nea = Fa = 0.
-    if wggc == 1:  
-        negc, Fgc = ne_gc(x,y,z) 
-    if wglism == 1: 
+    if wggc == 1:
+        negc, Fgc = ne_gc(x,y,z)
+    if wglism == 1:
         nelism, Flism, wlism, wldr, wlhb, wlsb, wloopI = ne_lism(x,y,z)
-    if wgcN == 1: 
-        necN, FcN, hitclump = neclumpN(x,y,z, inds_relevant=inds_relevant)
-    if wgvN == 1: 
+    if wgcN == 1:
+        necN, FcN, hitclump, arg = neclumpN(x,y,z, inds_relevant=inds_relevant)
+    if wgvN == 1:
         nevN, FvN, hitvoid, wvoid = nevoidN(x,y,z)
 
     if verbose:
         print('density: ', ne1, ne2, F1, F2)
 
-    
+
     return ne1,ne2,nea,negc,nelism,necN,nevN, \
            F1, F2, Fa, Fgc, Flism, FcN, FvN, \
            whicharm, wlism, wldr, wlhb, wlsb, wloopI, \
@@ -114,7 +114,7 @@ def density_2001(x, y, z, inds_relevant=None, verbose=False):
 
 # ---------------------------------------------------------------------------
 
-def density_2001_smallscale_comps(x, y, z, inds_relevant=None, verbose=False):  
+def density_2001_smallscale_comps(x, y, z, inds_relevant=None, verbose=False):
     """
     (Edited) Comments from Fortran code:
 
@@ -153,25 +153,25 @@ def density_2001_smallscale_comps(x, y, z, inds_relevant=None, verbose=False):
     negc = nelism = necN = nevN = 0
     wlism=wldr=wlhb=wlsb=wloopI = hitclump = hitvoid = wvoid = 0
 
-    if wggc == 1:  
-        negc, Fgc = ne_gc(x,y,z) 
-    if wglism == 1: 
+    if wggc == 1:
+        negc, Fgc = ne_gc(x,y,z)
+    if wglism == 1:
         nelism, Flism, wlism, wldr, wlhb, wlsb, wloopI = ne_lism(x,y,z)
-    if wgcN == 1: 
+    if wgcN == 1:
         necN, FcN, hitclump, arg = neclumpN(x,y,z, inds_relevant=inds_relevant) # SKO added arg to output for debugging
-    if wgvN == 1: 
+    if wgvN == 1:
         nevN, FvN, hitvoid, wvoid = nevoidN(x,y,z)
 
     #print('wgvN',wgvN,'hitvoid',hitvoid)
     #if verbose:
     #print('x,y,z,',x,y,z)
-    #print('density: ', negc, nelism, necN, nevN) 
+    #print('density: ', negc, nelism, necN, nevN)
 
     if wgcN == 0:
         necN = 0
         FcN = 0
         hitclump = 0
-    
+
     return negc,nelism,necN,nevN, \
            Fgc, Flism, FcN, FvN, \
            wlism, wldr, wlhb, wlsb, wloopI, \
@@ -179,7 +179,7 @@ def density_2001_smallscale_comps(x, y, z, inds_relevant=None, verbose=False):
 
 # ---------------------------------------------------------------------------
 
-def density_2001_smooth_comps(x, y, z, verbose=False):  
+def density_2001_smooth_comps(x, y, z, verbose=False):
     """
     Returns only the electron density for the smooth components.
     Utility: can be coarsely sampled to speed up computations.
@@ -198,7 +198,7 @@ def density_2001_smooth_comps(x, y, z, verbose=False):
       ne2:    inner, thin disk (annular in form)
       nea:    spiral arms
     01 Jan 2022
-    based on routines from NE2001 
+    based on routines from NE2001
     """
 
     # Assumes model parameters have been put into global dictionaries
@@ -208,25 +208,25 @@ def density_2001_smooth_comps(x, y, z, verbose=False):
     F1 = F2 = Fa = 0
     whicharm = 0
 
-    if wg1 == 1: 
+    if wg1 == 1:
         ne1, F1 = ne_outer(x,y,z)
-    if wg2 == 1: 
+    if wg2 == 1:
         ne2, F2 = ne_inner(x,y,z)
-    if wga == 1: 
+    if wga == 1:
         nea, Fa, whicharm = ne_arms_ne2001p(x,y,z, Ncoarse=Ncoarse)
 
     if verbose:
         print('density: ', ne1, ne2, F1, F2)
 
     # Define smooth components
-    # Fsmooth defined so that 
+    # Fsmooth defined so that
     # Fsmooth*ne_smooth**2 = F1*ne1**2 + F2*ne2**2 + Fa*nea**2`
     wne1 = wg1*ne1
     wne2 = wg2*ne2
     wnea = wga*nea
 
     ne_smooth = wne1 + wne2 + wnea
-    
+
     if ne_smooth > 0.:
         Fsmooth = (F1*(wne1)**2 + F2*wne2**2 + Fa*wnea**2) / ne_smooth**2
     else:

@@ -42,22 +42,22 @@ Version history:
     * now reads input parameters from dictionary program ne2001p_input
 
 02/08/20 -- JMC
-    * imports config_ne2001p for  model setup  
+    * imports config_ne2001p for  model setup
     * rsun = 8.5 now commented out, included in setup file
 
 12/28/21 - 01/02/22 -- JMC
     * added relevant_clumps function to prefilter clump list for the line
       of sight before integrating along it
 
-11/27/2023 -- SKO 
+11/27/2023 -- SKO
     * changed default value of rcmult to make sure clump prefiltering working properly
 12/15/2023 -- SKO
-    * corrected definition of inds_relevant so that LOS with dmax inside clump get counted 
+    * corrected definition of inds_relevant so that LOS with dmax inside clump get counted
 '''
 
 from mwprop.nemod.config_nemod import *
 
-def relevant_clumps(l, b, dmax, rcmult): 
+def relevant_clumps(l, b, dmax, rcmult):
     """
     Identifies clumps that contribute to n_e for the LoS
     specified by ldeg, bdeg, dmax.
@@ -83,7 +83,7 @@ def relevant_clumps(l, b, dmax, rcmult):
     # SKO -- need to force inds_relevant to recognize LOS that pass straight through clump center
     straight = np.where((1-cos_theta)<1e-4)
     cos_theta[straight] = 0.9998 # SKO -- to avoid sin inf errors
-    sin_theta = sqrt(1-cos_theta**2) 
+    sin_theta = sqrt(1-cos_theta**2)
     closest = dc * sin_theta
     closest[straight] = 0. # if you pass a LOS straight through the center, you want closest to be 0
 
@@ -91,7 +91,7 @@ def relevant_clumps(l, b, dmax, rcmult):
     # this will fail if there are ever very large clumps in the model.
 
     # note dc + rcmult*rc will be larger than dmax if dmax = dc
-    # SKO 12-15-23: changed condition to dc - rcmult*rc < dmax 
+    # SKO 12-15-23: changed condition to dc - rcmult*rc < dmax
 
     #inds_relevant = \
     #   np.where((dc + rcmult*rc < dmax) & (cos_theta > 0) & (closest < rcmult*rc)) # old condition
@@ -110,20 +110,20 @@ def relevant_clumps(l, b, dmax, rcmult):
 
 def neclumpN(x,y,z, inds_relevant=None):
     """
-    Returns electron density and F parameter for position x,y,z contributed by 
-    any clumps along the LoS.   
+    Returns electron density and F parameter for position x,y,z contributed by
+    any clumps along the LoS.
 
-    inds_relevant: 
-        None:     step through all clumps in list initiated in config_ne2001p 
+    inds_relevant:
+        None:     step through all clumps in list initiated in config_ne2001p
         Not None: function assumes this is a tuple indicating indices for
-                  only those clumps relevant for the line of sight. 
+                  only those clumps relevant for the line of sight.
     """
 
     if inds_relevant is None:
-        clumpnums = range(0, nclumps) 
+        clumpnums = range(0, nclumps)
     else:
         clumpnums = inds_relevant[0]
-    
+
     necN = 0.
     hitclump = 0
     FcN = 0.
@@ -133,10 +133,10 @@ def neclumpN(x,y,z, inds_relevant=None):
     #print('number of relevant clumps:',clumpnums)
 
     if np.isscalar(clumpnums)==True and clumpnums==-1: # SKO 11/27/23 -- if no relevant clumps, exit with necN set to 0
-        return necN,FcN,hitclump,arg 
+        return necN,FcN,hitclump,arg
 
     else:
-        for j in clumpnums: 
+        for j in clumpnums:
             arg = ((x-xc[j])**2. + (y-yc[j])**2. + (z-zc[j])**2.) / (rc[j]**2.)
             if edgec[j] == 0. and arg < 5.:
                 necN = necN + nec[j] * exp(-arg)
@@ -145,11 +145,11 @@ def neclumpN(x,y,z, inds_relevant=None):
                 hitclumpflag[j] = 1
             if edgec[j] == 1. and arg <= 1.:
                 #print('arg: ',arg,' edgec: ',edgec[j])
-                #print('xc,yc,zc,rc',xc,yc,zc,rc) 
+                #print('xc,yc,zc,rc',xc,yc,zc,rc)
                 necN = necN + nec[j]
                 FcN = Fc[j]
                 hitclump = j
                 hitclumpflag[j] = 1
 
-            
+
         return necN, FcN, hitclump, arg # SKO 3/6/22 -- added arg for debugging
