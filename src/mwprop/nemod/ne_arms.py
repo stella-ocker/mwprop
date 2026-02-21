@@ -56,6 +56,19 @@ def ne_arms_ne2001p(x,y,z, Ncoarse=20, dthfine=0.01, nfinespline=5, verbose=Fals
 
     rr = sqrt(x**2 + y**2)
     thxydeg = np.rad2deg(np.arctan2(-x, y))
+    if thxydeg < 0:
+        thxydeg += 360
+
+    # Cache model parameters to avoid repeated dict lookups in the loop
+    Dgal_wa = Dgal['wa']
+    Dgal_Aa = Dgal['Aa']
+    Dgal_ha = Dgal['ha']
+    Dgal_Fa = Dgal['Fa']
+
+    arm_index = np.fromiter((Darmmap[str(j)] for j in range(narms)), dtype=int)
+    warm = np.array([Dgal['warm'+str(jj)] for jj in arm_index])
+    harm = np.array([Dgal['harm'+str(jj)] for jj in arm_index])
+    narm = np.array([Dgal['narm'+str(jj)] for jj in arm_index])
 
     if verbose:
         print('arms rr, thxydeg: ', rr, thxydeg)
@@ -82,8 +95,8 @@ def ne_arms_ne2001p(x,y,z, Ncoarse=20, dthfine=0.01, nfinespline=5, verbose=Fals
         # some multiple of the e-folding half-width of the arm
 
         dmin = sqrt((x-xjmin)**2 + (y-yjmin)**2)
-        jj = Darmmap[str(j)]
-        wa = Dgal['wa']
+        jj = arm_index[j]
+        wa = Dgal_wa
 
         """
         Note armmap used here is to maintain the legacy arm numbering
@@ -91,9 +104,8 @@ def ne_arms_ne2001p(x,y,z, Ncoarse=20, dthfine=0.01, nfinespline=5, verbose=Fals
         New NE model could dispense with this.
         """
 
-        if thxydeg < 0: thxydeg += 360
         if j== 0: dmin_min = dmin
-        Wa = wa * Dgal['warm'+str(jj)]
+        Wa = wa * warm[j]
         if dmin < 3.*wa:
         #if dmin < 5.*wa:               # This helps reduce discontinuities
             if dmin <= dmin_min:
@@ -105,10 +117,10 @@ def ne_arms_ne2001p(x,y,z, Ncoarse=20, dthfine=0.01, nfinespline=5, verbose=Fals
             ga = np.exp(-argxy**2)
 
             # Galactocentric radial factor:
-            if rr > Dgal['Aa']: ga *= sech2((rr-Dgal['Aa'])/2.)
+            if rr > Dgal_Aa: ga *= sech2((rr-Dgal_Aa)/2.)
 
             # z factor:
-            Ha = Dgal['ha'] * Dgal['harm'+str(jj)]
+            Ha = Dgal_ha * harm[j]
             ga *= sech2(z/Ha)
 
             # Amplitude re-scalings as in NE2001 code;
@@ -137,7 +149,7 @@ def ne_arms_ne2001p(x,y,z, Ncoarse=20, dthfine=0.01, nfinespline=5, verbose=Fals
                     # fac = 1    # TEMP
                     ga *= fac
 
-            nea += ga * Dgal['narm'+str(jj)] * Dgal['na']
+            nea += ga * narm[j] * Dgal['na']
             s = sqrt(x**2 + (rsun-y)**2)
             #s = sqrt(x**2 + (8.5-y)**2)
             if verbose:
@@ -165,7 +177,7 @@ def ne_arms_ne2001p(x,y,z, Ncoarse=20, dthfine=0.01, nfinespline=5, verbose=Fals
         # For now, maintain this error in the Python code because the aim here
         # is to replicate the Fortran code:
 
-        Farm = Dgal['Fa']
+        Farm = Dgal_Fa
 
         # The question is then whether the error was in the code when fitting
         # was done to find the best values of farm_j?   I think the error was
