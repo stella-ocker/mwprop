@@ -23,28 +23,28 @@ def ne_arms_ne2001p(x,y,z, Ncoarse=20, dthfine=0.01, nfinespline=5, verbose=Fals
 
     Input:
         x, y, z = location in NE2001  coordinates  in kpc
-        Ncoarse = number of coarse samples along each arm 
+        Ncoarse = number of coarse samples along each arm
         dthfine = step size in Galactocentric angle for fine sampling (rad)
         nfinespline = number of coarse samples to use for fine-sampling spline
-        verbose = True:  writes out n_e component information 
+        verbose = True:  writes out n_e component information
 
     Output:
         ne        electron density        cm^{-3}
         F         F parameter             composite units
-        whicharm  which spiral arms       1 to 5, no close arm ==> 0 
+        whicharm  which spiral arms       1 to 5, no close arm ==> 0
     """
 
     # First find coarse location of points on arms nearest to input point
 
     narms = np.shape(coarse_arms)[1]
     dsq_coarse = (coarse_arms[0] - x)**2 + (coarse_arms[1] - y)**2
-    index_dsqmin = [dsq_coarse[j, :].argmin() for j in range(narms)]
+    index_dsqmin = np.argmin(dsq_coarse, axis=1)
 
     # Zoom in to find precision location and evaluate density and F parameter
 
     # number of coarse samples to use as input to fine spline
-    nspline2 = int((nfinespline-1)/2)     
-    
+    nspline2 = int((nfinespline-1)/2)
+
     # Initialize
     nea = 0.
     ga = 0.
@@ -64,27 +64,31 @@ def ne_arms_ne2001p(x,y,z, Ncoarse=20, dthfine=0.01, nfinespline=5, verbose=Fals
 
         # Use fine spline on coarse samples  to find nearest position on j-th arm
 
-        ind1 = range(max(0, index_dsqmin[j]-nspline2-1), 
+        ind1 = range(max(0, index_dsqmin[j]-nspline2-1),
                      min(index_dsqmin[j]+nspline2+1, Ncoarse), 1)
-        dsqs = CubicSpline(th1[j, ind1], dsq_coarse[j, ind1])    
+        dsqs = CubicSpline(th1[j, ind1], dsq_coarse[j, ind1])
         thjfine = np.arange(th1[j, ind1[0]], th1[j, ind1[-1]], dthfine)
         ind_min = dsqs(thjfine).argmin()
         thjmin = thjfine[ind_min]
-        sj = CubicSpline(th1[j,:], r1[j,:])                     
+        # Use precomputed spiral arm spline when available to avoid per-call setup cost
+        if 'armsplines' in globals() and len(armsplines) > j:
+            sj = armsplines[j]
+        else:
+            sj = CubicSpline(th1[j,:], r1[j,:])
         rjmin = sj(thjmin)
         xjmin, yjmin = -rjmin*np.sin(thjmin), rjmin*np.cos(thjmin)
 
         # Evaluate electron density for nearest spiral arm if it is within
         # some multiple of the e-folding half-width of the arm
-   
+
         dmin = sqrt((x-xjmin)**2 + (y-yjmin)**2)
         jj = Darmmap[str(j)]
-        wa = Dgal['wa'] 
+        wa = Dgal['wa']
 
         """
         Note armmap used here is to maintain the legacy arm numbering
         from NE2001 and TC93 using as input the arm numbering in Wainscoat.
-        New NE model could dispense with this. 
+        New NE model could dispense with this.
         """
 
         if thxydeg < 0: thxydeg += 360
@@ -101,7 +105,7 @@ def ne_arms_ne2001p(x,y,z, Ncoarse=20, dthfine=0.01, nfinespline=5, verbose=Fals
             ga = np.exp(-argxy**2)
 
             # Galactocentric radial factor:
-            if rr > Dgal['Aa']: ga *= sech2((rr-Dgal['Aa'])/2.)  
+            if rr > Dgal['Aa']: ga *= sech2((rr-Dgal['Aa'])/2.)
 
             # z factor:
             Ha = Dgal['ha'] * Dgal['harm'+str(jj)]
@@ -109,10 +113,10 @@ def ne_arms_ne2001p(x,y,z, Ncoarse=20, dthfine=0.01, nfinespline=5, verbose=Fals
 
             # Amplitude re-scalings as in NE2001 code;
             # Ignore cases where these have been turned off in that code (fossils!).
-            
+
             # TC arm 3:
             if jj == 3:
-                th3adeg, th3bdeg = 290, 363 
+                th3adeg, th3bdeg = 290, 363
                 test3 = thxydeg - th3adeg
                 if test3 < 0: test3 += 360
                 if 0 <= test3 and test3 < th3bdeg-th3adeg:
@@ -132,12 +136,12 @@ def ne_arms_ne2001p(x,y,z, Ncoarse=20, dthfine=0.01, nfinespline=5, verbose=Fals
                     fac = ((1 + fac2min + (1 - fac2min) * np.cos(arg))/2)**3.5
                     # fac = 1    # TEMP
                     ga *= fac
-            
-            nea += ga * Dgal['narm'+str(jj)] * Dgal['na'] 
+
+            nea += ga * Dgal['narm'+str(jj)] * Dgal['na']
             s = sqrt(x**2 + (rsun-y)**2)
             #s = sqrt(x**2 + (8.5-y)**2)
             if verbose:
-                print('arms: ', j, jj, whicharm_spiralmodel, index_dsqmin[j], 
+                print('arms: ', j, jj, whicharm_spiralmodel, index_dsqmin[j],
                     max(0, index_dsqmin[j]-nspline2-1),
                     min(index_dsqmin[j]+nspline2+1, Ncoarse), ind1)
                 print(
@@ -151,25 +155,25 @@ def ne_arms_ne2001p(x,y,z, Ncoarse=20, dthfine=0.01, nfinespline=5, verbose=Fals
         #Farm = Dgal['Fa'] * Dgal['farm'+str(whicharm)]    # Intended value
 
         ###### NOTE ######
-        # 2020 Feb 9:  
-        # found that the Fortran code doesn't use Farm calculated using 
-        # Fa x farm_j parameters.  This seems to be an error in dmdsm.NE2001.f, 
+        # 2020 Feb 9:
+        # found that the Fortran code doesn't use Farm calculated using
+        # Fa x farm_j parameters.  This seems to be an error in dmdsm.NE2001.f,
         # which uses Fa to calculate SM for the spiral arms instead of Faval,
         # the value returned by density.NE2001.f.    This only affects the
-        # spiral arm values for SM.   
+        # spiral arm values for SM.
 
         # For now, maintain this error in the Python code because the aim here
-        # is to replicate the Fortran code:  
+        # is to replicate the Fortran code:
 
         Farm = Dgal['Fa']
- 
-        # The question is then whether the error was in the code when fitting 
-        # was done to find the best values of farm_j?   I think the error was 
+
+        # The question is then whether the error was in the code when fitting
+        # was done to find the best values of farm_j?   I think the error was
         # not there during the fitting because some of the earlier code versions
-        # use Fa * farm_j.    
+        # use Fa * farm_j.
 
     if verbose:
-        print('arms whicharm_spiralmodel  whicharm: ', 
+        print('arms whicharm_spiralmodel  whicharm: ',
             whicharm_spiralmodel, whicharm)
-    
+
     return nea, Farm, whicharm
