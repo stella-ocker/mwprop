@@ -1,10 +1,10 @@
 # mwprop v2.0 Jan 2026
 
 '''
-Python version of subroutine nevoidN.f in NE2001 Fortran code 
+Python version of subroutine nevoidN.f in NE2001 Fortran code
 
-Returns electron density nevN and fluctuation parameter FvN 
-at position designated by l,b,d,x,y,z c for a set of  
+Returns electron density nevN and fluctuation parameter FvN
+at position designated by l,b,d,x,y,z c for a set of
 voids with parameters read in from file  nevoidN.dat
 
 input:
@@ -15,7 +15,7 @@ output:
     FvN fluctuation parameter
     hitvoid =   0:     no void hit
                 j>0:   j-th void hit
-    wvoid = 0,1:     void weight    
+    wvoid = 0,1:     void weight
 
 parameters:
     lv  = galactic longitude of void center
@@ -33,7 +33,7 @@ parameters:
                  1 => uniform and truncated at 1/e
 Version history:
 
-01/20/20 Stella Koch Ocker 
+01/20/20 Stella Koch Ocker
     * initial conversion f77 --> python
 01/23/20 -- now reads input parameters from dictionary program ne2001p_input
 02/08/20 -- JMC
@@ -54,7 +54,7 @@ def nevoidN(x,y,z):
     hitvoid = 0
     wvoid = 0
 
-    '''
+    r'''
     note rotation matrix in the 'q = ' statement below
     corresponds to \Lambda_z\Lambda_y
     where \Lambda_y = rotation around y axis
@@ -93,9 +93,9 @@ def nevoidN(x,y,z):
             #hitvoidflag[j] = 1
             #print('x,y,z,nev',x,y,z,nevN)
 
-    
+
     if hitvoid != 0:
         wvoid = 1
-    
-    #print(hitvoid,wvoid)  
+
+    #print(hitvoid,wvoid)
     return nevN, FvN, hitvoid, wvoid

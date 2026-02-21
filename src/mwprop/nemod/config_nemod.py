@@ -28,7 +28,7 @@ from scipy.optimize import fsolve, root, brentq
 from scipy.optimize import minimize_scalar
 import mpmath as mp
 
-from matplotlib.pyplot import figure, subplots_adjust, plot, axis 
+from matplotlib.pyplot import figure, subplots_adjust, plot, axis
 from matplotlib.pyplot import xlabel, ylabel, title, annotate
 from matplotlib.pyplot import tick_params, legend, show, close, savefig
 
@@ -40,7 +40,7 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 
 from mwprop.get_constants_waveprop_scipy_version import *
 
-# Get parameter input 
+# Get parameter input
 from mwprop.nemod import ne_input
 
 # get some additional units from astropy
@@ -61,7 +61,7 @@ sech2 = lambda z: mp.sech(z)**2
 
 
 # Solar system to Galactic center distance (kpc) set here
-rsun = 8.5                              
+rsun = 8.5
 
 # Reference radio frequency for calculating chromatic quantities
 rf_ref = 1.             # GHz
@@ -70,7 +70,7 @@ rf_ref = 1.             # GHz
 vperp = 100             # km/s
 
 # Default spectral index for electron density wavenumber spectrum
-sikol = 11/3                                            # spectral index 
+sikol = 11/3                                            # spectral index
 
 # Reference outer scale for Kolmogorov spectrum
 louter = 1              # pc
@@ -113,7 +113,7 @@ def setup_spiral_arms(Ncoarse=20, narmpoints=500, drfine=0.01):
 
         armmap = np.array([1, 3, 4, 2, 5])
         Darmmap = {}
-        for j in range(narms): 
+        for j in range(narms):
             Darmmap[str(j)] = armmap[j]
 
         """
@@ -226,10 +226,10 @@ def setup_spiral_arms(Ncoarse=20, narmpoints=500, drfine=0.01):
 
 # General parameters for model
 
-"""
+r"""
 Values and coefficients for a 3D Kolmogorov spectrum
 
-For SM modeling (as in NE2001): 
+For SM modeling (as in NE2001):
 Units conversion for SM in kpc m^{-20/3} and for outer scale in pc
 i.e. SM \propto distance x l_o^{-2/3} x n_e^2
 so with distance in kpc,  l_o in pc, and n_e in cm^{-3} we get
@@ -243,10 +243,10 @@ c_u = (l_o in cm)^{-2/3} x (n_e in cm^{-3})^2 x (cm per m)^{20/3}
     \simeq 10.165
 
 For straight units conversion from kpc m^{-20/3} to cm^{-17/3}
-we have 
+we have
      SMunit (cgs)  = kpc*10.**(-40./3.)             # kpc m^-20/3 to cgs
 defined in get_constants_waveprop_astropy.py (and scipy version)
-We don't use this in the NE2001 modeling code.. 
+We don't use this in the NE2001 modeling code..
 """
 c_sm = (sikol-3) / (2 * (2*pi)**(4-sikol))              # ~ 0.181
 c_u_units = ((1 * u.m)**(20/3) / (u.pc)**(2/3))         # using astropy units
@@ -368,11 +368,11 @@ nelpI,dnelpI,FlpI,dFlpI =  [Dlism[x] for x in ['nelpI','dnelpI','FlpI','dFlpi']]
 ylpImin = ylpI - rlpI - drlpI
 ylpImax = ylpI + rlpI + drlpI
 
-# y_lism_min = minimum y value for LISM components to matter 
-# y_lism_max = maximum y value for LISM components to matter 
+# y_lism_min = minimum y value for LISM components to matter
+# y_lism_max = maximum y value for LISM components to matter
 
-y_lism_min = min((yldrmin, ylsbmin, ylhbmin, ylpImin)) 
-y_lism_max = max((yldrmax, ylsbmax, ylhbmax, ylpImax)) 
+y_lism_min = min((yldrmin, ylsbmin, ylhbmin, ylpImin))
+y_lism_max = max((yldrmax, ylsbmax, ylhbmax, ylpImax))
 
 
 

@@ -10,4 +10,5 @@ dependencies:
   - mpmath
   - pytest
   - pytest-cov
+  - pytest-mpl
   - pip
