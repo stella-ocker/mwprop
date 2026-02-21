@@ -1,0 +1,13 @@
+name: mwprop
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.6
+  - numpy
+  - scipy
+  - astropy
+  - matplotlib
+  - mpmath
+  - pytest
+  - pytest-cov
+  - pip

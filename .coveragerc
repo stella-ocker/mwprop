@@ -1,0 +1,22 @@
+[run]
+source = src/mwprop
+branch = True
+omit =
+    */site-packages/*
+    */distutils/*
+    */__pycache__/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod
+precision = 2
+show_missing = True
+
+[html]
+directory = htmlcov
