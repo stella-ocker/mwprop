@@ -201,11 +201,19 @@ def dmdsm_dm2d(l, b, dm_target, ds_coarse=0.1, ds_fine=0.01, Nsmin=20,
         # Smooth, large-scale components on coarse grid:
         # ----------------------------------------------
         # Note only cnd_smooth, cFsmooth needed here
-        cne1,cne2,cnea, cF1, cF2, cFa, cwhicharm, cne_smooth, cFsmooth = \
-            array([
-               density_2001_smooth_comps(xc_vec[j],yc_vec[j],zc_vec[j])
-               for j in range(Ns_coarse)
-            ]).T
+        cne1 = np.empty(Ns_coarse)
+        cne2 = np.empty(Ns_coarse)
+        cnea = np.empty(Ns_coarse)
+        cF1 = np.empty(Ns_coarse)
+        cF2 = np.empty(Ns_coarse)
+        cFa = np.empty(Ns_coarse)
+        cwhicharm = np.empty(Ns_coarse)
+        cne_smooth = np.empty(Ns_coarse)
+        cFsmooth = np.empty(Ns_coarse)
+        for j in range(Ns_coarse):
+            cne1[j], cne2[j], cnea[j], cF1[j], cF2[j], cFa[j], \
+                cwhicharm[j], cne_smooth[j], cFsmooth[j] = \
+                density_2001_smooth_comps(xc_vec[j], yc_vec[j], zc_vec[j])
 
         # Spline functions:
         cs_ne_smooth = CubicSpline(sc_vec, cne_smooth)
@@ -222,13 +230,28 @@ def dmdsm_dm2d(l, b, dm_target, ds_coarse=0.1, ds_fine=0.01, Nsmin=20,
         # ------------------------------------
         # Small-scale components on fine grid:
         # ------------------------------------
-        negc,nelism,necN,nevN, Fgc, Flism, FcN, FvN, wlism, wldr, wlhb, wlsb, wloopI, \
-           hitclump, hitvoid, wvoid = \
-               array([
-                   density_2001_smallscale_comps(\
-                       xf_vec[j],yf_vec[j],zf_vec[j], inds_relevant=relevant_clump_indices) \
-                       for j in range(Ns_fine)\
-               ]).T
+        negc = np.empty(Ns_fine)
+        nelism = np.empty(Ns_fine)
+        necN = np.empty(Ns_fine)
+        nevN = np.empty(Ns_fine)
+        Fgc = np.empty(Ns_fine)
+        Flism = np.empty(Ns_fine)
+        FcN = np.empty(Ns_fine)
+        FvN = np.empty(Ns_fine)
+        wlism = np.empty(Ns_fine)
+        wldr = np.empty(Ns_fine)
+        wlhb = np.empty(Ns_fine)
+        wlsb = np.empty(Ns_fine)
+        wloopI = np.empty(Ns_fine)
+        hitclump = np.empty(Ns_fine)
+        hitvoid = np.empty(Ns_fine)
+        wvoid = np.empty(Ns_fine)
+        for j in range(Ns_fine):
+            negc[j], nelism[j], necN[j], nevN[j], Fgc[j], Flism[j], FcN[j], FvN[j], \
+                wlism[j], wldr[j], wlhb[j], wlsb[j], wloopI[j], hitclump[j], hitvoid[j], \
+                wvoid[j] = density_2001_smallscale_comps(
+                    xf_vec[j], yf_vec[j], zf_vec[j], inds_relevant=relevant_clump_indices
+                )
 
         #if debug:
         #	print('hitvoid',hitvoid)
@@ -264,19 +287,18 @@ def dmdsm_dm2d(l, b, dm_target, ds_coarse=0.1, ds_fine=0.01, Nsmin=20,
     hitvoid = hitvoid.astype(int)
 
     if np.count_nonzero(hitclump)!=0:
-    	warnings.warn('Clump(s) intersected. Run los_diagnostics.py for details.')
+        warnings.warn('Clump(s) intersected. Run los_diagnostics.py for details.')
     if np.count_nonzero(hitvoid)!=0:
-    	warnings.warn('Void(s) intersected. Run los_diagnostics.py for details.')
+        warnings.warn('Void(s) intersected. Run los_diagnostics.py for details.')
 
     if debug:
-    	print('ne',ne)
-    	#print('hitvoid:',hitvoid)
-    # Integrate using trapz to get cumulative DM:
-    dm_cumulate_vec = pc_in_kpc * cumulative_trapezoid(ne, sf_vec, initial=0.0)
-    dm_calc_max = dm_cumulate_vec[-1]       # maximum dm calculated
+        print('ne',ne)
+        #print('hitvoid:',hitvoid)
+
+    # dm_cumulate_vec and dm_calc_max already computed in the final pass
 
     if debug:
-    	print('dm_calc_max',dm_calc_max)
+        print('dm_calc_max',dm_calc_max)
     # Test if calculated DMs reach dm_target.
     # If not, attribute this to a lower bound on the distance, as in NE2001 (fortran),
     # though it might be better to attribute this to insufficent electrons.
