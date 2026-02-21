@@ -26,7 +26,6 @@ from scipy.interpolate import CubicSpline
 from scipy.interpolate import UnivariateSpline
 from scipy.optimize import fsolve, root, brentq
 from scipy.optimize import minimize_scalar
-import mpmath as mp
 
 from matplotlib.pyplot import figure, subplots_adjust, plot, axis
 from matplotlib.pyplot import xlabel, ylabel, title, annotate
@@ -57,7 +56,7 @@ zeros = np.zeros
 
 deg2rad = np.deg2rad
 rad2deg = np.rad2deg
-sech2 = lambda z: mp.sech(z)**2
+sech2 = lambda z: 4.0 * np.exp(-2.0 * np.abs(z)) / (1.0 + np.exp(-2.0 * np.abs(z)))**2
 
 
 # Solar system to Galactic center distance (kpc) set here

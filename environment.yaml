@@ -7,7 +7,6 @@ dependencies:
   - scipy
   - astropy
   - matplotlib
-  - mpmath
   - pytest
   - pytest-cov
   - pytest-mpl
