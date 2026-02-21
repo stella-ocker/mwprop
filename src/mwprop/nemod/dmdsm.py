@@ -39,6 +39,7 @@ from numpy import log10
 from numpy import array, linspace, where, size
 from numpy import digitize, interp
 from scipy.interpolate import interp1d
+from scipy.integrate import cumulative_trapezoid
 
 from mwprop.nemod.config_nemod import *
 from mwprop.nemod.density import *
@@ -239,8 +240,7 @@ def dmdsm_dm2d(l, b, dm_target, ds_coarse=0.1, ds_fine=0.01, Nsmin=20,
         #if np.count_nonzero(wgcN*necN)!=0:
         	#print('Warning: Clump(s) intersected. Run los_diagnostics.py for details.')
 
-        dm_cumulate_vec = \
-            pc_in_kpc * array([trapz(ne[:j], sf_vec[:j]) for j in range(1, Ns_fine+1) ])
+        dm_cumulate_vec = pc_in_kpc * cumulative_trapezoid(ne, sf_vec, initial=0.0)
         dm_calc_max = dm_cumulate_vec[-1]       # maximum dm calculated for this pass
 
         # Interpolate to get distance estimate:
@@ -272,7 +272,7 @@ def dmdsm_dm2d(l, b, dm_target, ds_coarse=0.1, ds_fine=0.01, Nsmin=20,
     	print('ne',ne)
     	#print('hitvoid:',hitvoid)
     # Integrate using trapz to get cumulative DM:
-    dm_cumulate_vec = pc_in_kpc * array([trapz(ne[:j], sf_vec[:j]) for j in range(1,Ns_fine+1)])
+    dm_cumulate_vec = pc_in_kpc * cumulative_trapezoid(ne, sf_vec, initial=0.0)
     dm_calc_max = dm_cumulate_vec[-1]       # maximum dm calculated
 
     if debug:
@@ -353,13 +353,10 @@ def dmdsm_dm2d(l, b, dm_target, ds_coarse=0.1, ds_fine=0.01, Nsmin=20,
         # First integrate over sf_vec then use cubic spline to find SM at d = dhat.
 
         Nsf1 = np.size(sf_vec) + 1
-        dsm_cumulate1_vec = array([trapz(dsm[:j], sf_vec[:j]) for j in range(1, Nsf1)])
-        dsm_cumulate2_vec = \
-            array([trapz(sf_vec[:j]*dsm[:j], sf_vec[:j]) for j in range(1, Nsf1)])
-        dsm_cumulate3_vec = \
-            array([trapz(sf_vec[:j]**2*dsm[:j], sf_vec[:j]) for j in range(1, Nsf1)])
-        dsm_cumulate4_vec = \
-            array([trapz(sf_vec[:j]**sm_iso_index*dsm[:j], sf_vec[:j]) for j in range(1, Nsf1)])
+        dsm_cumulate1_vec = cumulative_trapezoid(dsm, sf_vec, initial=0.0)
+        dsm_cumulate2_vec = cumulative_trapezoid(sf_vec * dsm, sf_vec, initial=0.0)
+        dsm_cumulate3_vec = cumulative_trapezoid(sf_vec**2 * dsm, sf_vec, initial=0.0)
+        dsm_cumulate4_vec = cumulative_trapezoid(sf_vec**sm_iso_index * dsm, sf_vec, initial=0.0)
 
         sm_cumulate = sm_factor * dsm_cumulate1_vec
         smtau_cumulate = 6 * (sm_factor/dhat) * (dsm_cumulate2_vec - dsm_cumulate3_vec/dhat)
