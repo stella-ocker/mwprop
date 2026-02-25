@@ -11,18 +11,18 @@ from math import *
 from scipy import stats
 from matplotlib.pyplot import rc, figure, axes, axis, xscale, yscale, \
                        plot, fill_between, xlabel, ylabel, annotate, \
-                       title, legend, grid, savefig, show, close 
+                       title, legend, grid, savefig, show, close
 import sys
 
 # Import useful constants ... get them all (not that many)
-# Note other routines in this subpackage see bare constants (e.g. KDM) 
+# Note other routines in this subpackage see bare constants (e.g. KDM)
 # but if this subpackage is imported in ipython as
 # from mwprop.scattering_functions import iss_mw_utils2020p as ut
 # need ut.KDM to see the value of KDM.
 
-from mwprop.get_constants_waveprop_scipy_version import * 
+from mwprop.get_constants_waveprop_scipy_version import *
 
-import mwprop.scattering_functions.scattering_functions2020 as sf 
+import mwprop.scattering_functions.scattering_functions2020 as sf
 
 input = input
 
@@ -32,7 +32,7 @@ def testit():
 #======================================================================`
 
 def theta_iso_at_RF(RF, SMiso, DEFFSM, scattype,  si=11./3.):
-   """
+   r"""
    Calculates the isoplanatic angle in milliarcseconds at the specified RF.
    Assumes a Kolmogorov scaling (si=11/3).
 
@@ -40,7 +40,7 @@ def theta_iso_at_RF(RF, SMiso, DEFFSM, scattype,  si=11./3.):
            SM_iso   standard SM uits
            DEFFSM   kpc
            si = wavenumber spectral index for electron-density (e.g. 11/3)
-   Output: 
+   Output:
            THETA_ISO            mas at 1 GHz
            THETA_ISO_RF         mas at RF
 
@@ -51,18 +51,18 @@ def theta_iso_at_RF(RF, SMiso, DEFFSM, scattype,  si=11./3.):
                 = \left [
                      (\lambda r_e)^2 f_{\alpha} SM_{iso}
                   \right ]^{1/\alpha}
-   where 
+   where
          \lambda = EM wavelength (cm)
          re = classical electron radius (cgs)
          \alpha = 5/3 for Kolmogorov case.
          SM_{iso} = \int_0^d ds s^{\alpha} \cnsq
             so SM_{iso} does not have the units of scattering
             measure, but rather units of SM x Length^{\alpha}
- 
-         f_{\alpha} = 
+
+         f_{\alpha} =
            8\pi^2 \Gamma(1-\alpha/2) / [\alpha 2^{\alpha} \Gamma(1+\alpha/2)]
            for \alpha = 5/3, f_{\alpha}= 88.3
- 
+
    theta_log_radian =
        13.287                                ! 0.6*log10(30cm*r_e)
      + 1.2 * np.log10(nu)
@@ -77,7 +77,7 @@ def theta_iso_at_RF(RF, SMiso, DEFFSM, scattype,  si=11./3.):
        theta_iso = lambda / Deff
 
    """
- 
+
    if scattype == 'strong' or scattype == 'transition':
       xiso = si / (si-2.) - 1.
 
@@ -86,16 +86,16 @@ def theta_iso_at_RF(RF, SMiso, DEFFSM, scattype,  si=11./3.):
         - 1.1676 \
         - 0.6 * np.log10(SMiso) \
         - 34.383 \
-        + 8.                                     
+        + 8.
       theta_log_microarcsec = \
           theta_log_radian + 11.314425        # 11.314425=alog10(microarsec/rad)
       THETA_ISO = 10.**theta_log_radian / mas
       THETA_ISO_RF = THETA_ISO * RF**xiso
 
    if scattype == 'weak':       # NEEDS CHECKING
-      xiso = -0.5 
+      xiso = -0.5
       rF_1GHz = np.sqrt(wavelen1GHz * DEFFSM * kpc / (2.*pi))
-      THETA_ISO = (wavelen1GHz / rF_1GHz) / mas     # mas at 1 GHz 
+      THETA_ISO = (wavelen1GHz / rF_1GHz) / mas     # mas at 1 GHz
       THETA_ISO_RF = THETA_ISO * RF**xiso
 
    return THETA_ISO, THETA_ISO_RF
@@ -106,24 +106,24 @@ def theta_iso_at_RF(RF, SMiso, DEFFSM, scattype,  si=11./3.):
 def scale_diss_params_to_RF(rfratio, TAU, THETA_X, si=11./3.):
 
    """
-   Scales relevant parameters outputed by NE2001 to the designated RF 
+   Scales relevant parameters outputed by NE2001 to the designated RF
    assuming a Kolmogorov scaling (si=11/3).
 
-   Input:  
+   Input:
            rfratio = (ratio of RF for output values) / (RF for input values)
            TAU          ms
            THETA_X      mas
-           si = wavenumber spectral index for electron-density  
-   Output: 
-           TAU_RF           ms at RF  
+           si = wavenumber spectral index for electron-density
+   Output:
+           TAU_RF           ms at RF
            THETA_X_RF       mas at RF
    """
 
    xsbw = 2.*si / (si-2.)
-   xtau = -xsbw 
+   xtau = -xsbw
    xthetax = -xsbw/2.
 
-   TAU_RF = TAU * rfratio**xtau  
+   TAU_RF = TAU * rfratio**xtau
    THETA_X_RF = THETA_X * rfratio**xthetax
 
    return TAU_RF, THETA_X_RF
@@ -132,35 +132,35 @@ def scale_diss_params_to_RF(rfratio, TAU, THETA_X, si=11./3.):
 
 def scale_NE2001_output_to_RF(RF,TAU,SBW,SCINTIME,THETA_G,THETA_X,si=11./3.):
    """
-   Scales relevant parameters outputed by NE2001 to the designated RF 
+   Scales relevant parameters outputed by NE2001 to the designated RF
    assuming a Kolmogorov scaling (si=11/3).
 
-   Input:  
+   Input:
            TAU          ms
            SBW          MHz
            SCINTIME     sec
            THETA_G      mas
            THETA_X      mas
            RF           GHz
-           si = wavenumber spectral index for electron-density  
-   Output: 
-           TAU_RF           ms at RF  
-           SBW_RF           MHz at RF  
-           SCINTIME_RF      sec at RF  
-           THETA_G_RF       mas at RF  
+           si = wavenumber spectral index for electron-density
+   Output:
+           TAU_RF           ms at RF
+           SBW_RF           MHz at RF
+           SCINTIME_RF      sec at RF
+           THETA_G_RF       mas at RF
            THETA_X_RF       mas at RF
    """
 
    xsbw = 2.*si / (si-2.)
-   xtau = -xsbw 
+   xtau = -xsbw
    xscintime = xsbw/2. - 1.
    xthetag = -xsbw/2.
    xthetax = xthetag
 
-   TAU_RF = TAU * RF**xtau  
-   SBW_RF = SBW * RF**xsbw   
-   SCINTIME_RF = SCINTIME * RF**xscintime   
-   THETA_G_RF = THETA_G * RF**xthetag  
+   TAU_RF = TAU * RF**xtau
+   SBW_RF = SBW * RF**xsbw
+   SCINTIME_RF = SCINTIME * RF**xscintime
+   THETA_G_RF = THETA_G * RF**xthetag
    THETA_X_RF = THETA_X * RF**xthetax
 
    return TAU_RF, SBW_RF, SCINTIME_RF, THETA_G_RF, THETA_X_RF
@@ -169,8 +169,8 @@ def scale_NE2001_output_to_RF(RF,TAU,SBW,SCINTIME,THETA_G,THETA_X,si=11./3.):
 
 def ggpdf(x, rms1, rms2):
    """
-   Calculates gamma-gamma PDF for combined diffractive and refractive 
-   scintillations given in Eq. 20 of Prokes, 
+   Calculates gamma-gamma PDF for combined diffractive and refractive
+   scintillations given in Eq. 20 of Prokes,
    'Modeling of Atmospheric Turbulence Effect on Terrestrial FSO Link'
 
    """
@@ -182,11 +182,11 @@ def ggpdf(x, rms1, rms2):
    a = 1./rms1**2
    b = 1./rms2**2
 
-   e1 = (a+b)/2. 
+   e1 = (a+b)/2.
    nu = a-b
-   arg1 = 2. * np.sqrt(a*b*x)   
+   arg1 = 2. * np.sqrt(a*b*x)
 
-   #coeff1 = (2. * (a*b)**e1) / (gamma(a) * gamma(b)) 
+   #coeff1 = (2. * (a*b)**e1) / (gamma(a) * gamma(b))
    coeffln = np.log(2.) + e1*np.log(a*b) - gammaln(a) - gammaln(b)
    kve = kve(nu, arg1)
    pdfln = coeffln + (e1-1.)*np.log(x) + np.log(kv(nu, arg1))
@@ -197,11 +197,11 @@ def ggpdf(x, rms1, rms2):
 #======================================================================`
 
 def mriss_goodman_narayan(si, phif):
-   """
+   r"""
    Returns the RISS modulation index using equation 3.1.5 of
    Goodman & Narayan 1985.
 
-   Input: 
+   Input:
       si = beta = wavenumber index of electron density power spectrum
       e.g. beta = 11/3 for Kolmogorov case
 
@@ -209,13 +209,13 @@ def mriss_goodman_narayan(si, phif):
 
       phif = rms phase difference on the Fresnel scale
              with Fresnel scale for plane-wave incidence on a phase screen
-             at distance d: rf = \lambda d / 2\pi. 
+             at distance d: rf = \lambda d / 2\pi.
 
-             The "u" parameter is calculated from phif as 
+             The "u" parameter is calculated from phif as
              u = phif^{2/(\beta -2} in the evaluation.
-   Output: 
+   Output:
 
-      mriss 
+      mriss
 
    """
    from math import gamma
@@ -238,11 +238,11 @@ def lnorm_from_mean_rms(x, mean, rms):
    Calculates lognorm pdf for specificed x range and mean, rms of x.
    Note:
 
-   mean = exp(mu+sigma**2/2) 
+   mean = exp(mu+sigma**2/2)
    median = exp(mu) = 1.05
    variance = (e^{sigma^2}-1) e^{2*mu+sigma^2}
 
-   where mu, sigma are standard parameters for the log-normal pdf 
+   where mu, sigma are standard parameters for the log-normal pdf
    """
 
    sigma = np.sqrt(np.log(1 + (rms/mean)**2))
@@ -266,21 +266,21 @@ def lnorm_from_mean_rms(x, mean, rms):
 def calculate_fresnel_scale_and_mod_indices(RF, DEFFSM, THETA_X_RF, si=11./3.):
     """
     Calculates phiF and modulation indices.
-    si = index of wavenumber spectrum for ne 
+    si = index of wavenumber spectrum for ne
     """
 
     wavelength = c / (RF*GHz)
     rF = np.sqrt(DEFFSM *kpc * wavelength / (2.*pi))    # Fresnel scale cm
 
     phiF = np.sqrt(2.) * \
-       ( (pi*THETA_X_RF*mas * rF / wavelength) / (2.*np.sqrt(np.log(2.))) )**((si-2.)/2.) 
+       ( (pi*THETA_X_RF*mas * rF / wavelength) / (2.*np.sqrt(np.log(2.))) )**((si-2.)/2.)
 
     u = phiF**(2./(si-2.))
 
     """
     Modulation indices for different regimes of u:
-    use definitions of md, mr that are continuous across the 
-    weak/strong boundary. Do so by using an equipartition approach for 
+    use definitions of md, mr that are continuous across the
+    weak/strong boundary. Do so by using an equipartition approach for
     u << 1 but one that asymptotically gives
     reasonable modulation indices md = 1 and mr = (2u)^{-1/2}
     """
@@ -301,8 +301,8 @@ def calculate_fresnel_scale_and_mod_indices(RF, DEFFSM, THETA_X_RF, si=11./3.):
        if u <= 2:
           scattype = 'transition'
        else:
-          scattype = 'strong' 
-    return rF, ld, lr, phiF,  u,  mgp, mdp, mrp, scattype 
+          scattype = 'strong'
+    return rF, ld, lr, phiF,  u,  mgp, mdp, mrp, scattype
 
 #======================================================================`
 
@@ -318,7 +318,7 @@ def calculate_diss_bandwidth_factor(sbw, bw):
       bwfactor
    """
    eta_nu = 0.3
-   ndiss = 1.+eta_nu * bw / sbw 
+   ndiss = 1.+eta_nu * bw / sbw
    bwfactor = 1./np.sqrt(ndiss)
    return ndiss, bwfactor
 
@@ -337,7 +337,7 @@ def calculate_diss_source_size_factor(theta_source, theta_iso):
    """
    #source_size_factor = min(1., theta_iso/theta_source)
    # changed 2016 July 5
-   source_size_factor = (1. + (theta_source/ theta_iso)**2)**(-1./2.) 
+   source_size_factor = (1. + (theta_source/ theta_iso)**2)**(-1./2.)
    return source_size_factor
 
 #======================================================================`
@@ -345,7 +345,7 @@ def calculate_diss_source_size_factor(theta_source, theta_iso):
 def invert_function(x, func, level):
    """
    Finds the value of x at which func = level.
-   Interpolation is done.  
+   Interpolation is done.
    """
    xlevel = np.interp(level, func, x)
    return xlevel
@@ -353,11 +353,11 @@ def invert_function(x, func, level):
 
 #======================================================================`
 
-def calc_pdfg_for_xgal_los(RF, BW, RF_input, TAU, THETA_X, Deff, SM, 
+def calc_pdfg_for_xgal_los(RF, BW, RF_input, TAU, THETA_X, Deff, SM,
     theta_source=1.e-6, dg=1.e-5, gmin=1.e-5, gmax=30., si=11./3.):
 
     """
-    Calculates the PDF and CDF for the  ISS modulation for the 
+    Calculates the PDF and CDF for the  ISS modulation for the
     a line of sight characterized by TAU, THETA_X, Deff, SM
     and for the specified RF and bandwidth.
 
@@ -365,7 +365,7 @@ def calc_pdfg_for_xgal_los(RF, BW, RF_input, TAU, THETA_X, Deff, SM,
     BW              Bandwidth                                   MHz
     RF_input        Radio frequency of input ISS values         GHz
     TAU             Pulse broadening time                        ms
-    THETA_X         Angular diameter of extragalactic 
+    THETA_X         Angular diameter of extragalactic
                     source caused by MW scattering              mas
     Deff            Effective distance to MW scattering region  kpc
     SM              Scattering measure                          kpc m^{-20/}
@@ -397,9 +397,9 @@ def calc_pdfg_for_xgal_los(RF, BW, RF_input, TAU, THETA_X, Deff, SM,
 
     SCINTIME_RF = sf.scintime(SM, RF, vperp=100)        # for 100 km/s
 
-    SBW_RF = 1.e-3 * C1 / (2. * pi * TAU_RF)            # MHz 
+    SBW_RF = 1.e-3 * C1 / (2. * pi * TAU_RF)            # MHz
 
-    nu_transition = sf.transition_frequency_from_obs(RF, SBW_RF, si=si) 
+    nu_transition = sf.transition_frequency_from_obs(RF, SBW_RF, si=si)
 
     ndiss, bandwidth_factor = calculate_diss_bandwidth_factor(SBW_RF, BW)
 
@@ -429,14 +429,14 @@ def calc_pdfg_for_xgal_los(RF, BW, RF_input, TAU, THETA_X, Deff, SM,
        if md > mdtrans and mr <= 0.1:
          pdftype = 'chi-square'
          pdftypelab = 'X'
-         dof_g = 2. / mg**2         # DoF for chi^2 pdf 
+         dof_g = 2. / mg**2         # DoF for chi^2 pdf
 
-    if scattype == 'transition':    # 
+    if scattype == 'transition':    #
          stypelab = 'T'
          pdftype = 'gamma-gamma'
          pdftypelab = 'GG'
 
-    if scattype == 'weak':      # log-normal PDF 
+    if scattype == 'weak':      # log-normal PDF
          stypelab = 'W'
          mg = mgp * source_size_factor
          sigma = np.sqrt(np.log(1.+mg**2))
@@ -458,9 +458,9 @@ def calc_pdfg_for_xgal_los(RF, BW, RF_input, TAU, THETA_X, Deff, SM,
        pdflabel = r'$\chi^2_{\rm n}$'
        loc = 0.
        scale = 1. / dof_g       # gives pdf of reduced chi-square quantity
-       gpdf = chi2.pdf(gvec, dof_g, loc, scale) 
+       gpdf = chi2.pdf(gvec, dof_g, loc, scale)
        gcdf = (np.cumsum(wvec*gpdf) + chi2.pdf(dg/2., dof_g, loc, scale)) * dg
-       
+
     if pdftype == 'gamma-gamma':
        pdflabel = r'$\gamma\gamma}$'
        gpdf = ggpdf(gvec, md, mr)
@@ -479,7 +479,7 @@ def calc_pdfg_for_xgal_los(RF, BW, RF_input, TAU, THETA_X, Deff, SM,
        'scintime_rf', 'bandwidth_factor', 'source_size_factor'])
 
     Dissvals = \
-        list([RF, TAU, SM, TAU_RF, THETA_X, THETA_X_RF, rF, ld, lr, phiF, u, scattype, mr, md, mdp, mg, gmedian, stypelab, pdftype, pdflabel, gvec, gpdf, gcdf, nu_transition, THETA_ISO, THETA_ISO_RF, SBW_RF, SCINTIME_RF, bandwidth_factor, source_size_factor]) 
+        list([RF, TAU, SM, TAU_RF, THETA_X, THETA_X_RF, rF, ld, lr, phiF, u, scattype, mr, md, mdp, mg, gmedian, stypelab, pdftype, pdflabel, gvec, gpdf, gcdf, nu_transition, THETA_ISO, THETA_ISO_RF, SBW_RF, SCINTIME_RF, bandwidth_factor, source_size_factor])
 
     Dissunits = np.array([
         'GHz', 'ms', 'kpc m^{-20/3}', 'ms', 'mas', 'mas', 'cm', 'cm', 'cm', 'rad', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'GHz', 'mas', 'mas', 'MHz', 's', '', '' ])
@@ -506,7 +506,7 @@ def calc_pdfg_for_xgal_los(RF, BW, RF_input, TAU, THETA_X, Deff, SM,
     D_iss['ld'] = ld
     D_iss['lr'] = lr
     D_iss['phiF'] = phiF
-    D_iss['u'] = u 
+    D_iss['u'] = u
     D_iss['scattype'] = scattype
     D_iss['mr'] = mr
     D_iss['md'] = md
@@ -520,13 +520,13 @@ def calc_pdfg_for_xgal_los(RF, BW, RF_input, TAU, THETA_X, Deff, SM,
     D_iss['gpdf'] = gpdf
     D_iss['gcdf'] = gcdf
     D_iss['nu_transition'] = nu_transition
-    D_iss['theta_iso'] = THETA_ISO 
-    D_iss['theta_iso_rf'] = THETA_ISO_RF 
+    D_iss['theta_iso'] = THETA_ISO
+    D_iss['theta_iso_rf'] = THETA_ISO_RF
     D_iss['sbw_rf'] = SBW_RF
     D_iss['scintime_rf'] = SCINTIME_RF
     D_iss['bandwidth_factor'] = bandwidth_factor
-    D_iss['source_size_factor'] = source_size_factor 
-    return D_iss, Disskeys, Dissvals 
+    D_iss['source_size_factor'] = source_size_factor
+    return D_iss, Disskeys, Dissvals
     """
 
     return Dissv, Dissu, Dissd
@@ -543,7 +543,7 @@ def main(l, b, RF, BW, dxgal_mpc, theta_source, SM, DMmodel, doplot=False):
 
     print("input = ", l,b,RF,BW,dxgal_mpc,theta_source)
 
-    """ 
+    """
     Evaluates DISS and RISS modulation indices and probabilities for the net gain
     given a direction (l,b), frequency \nu, bandwidth B, and extragalactic source size in milliarcseconds.
     """
@@ -565,45 +565,45 @@ def main(l, b, RF, BW, dxgal_mpc, theta_source, SM, DMmodel, doplot=False):
     THETA_X_RF = D_iss['theta_x_rf']
     THETA_ISO = D_iss['theta_iso']
     THETA_ISO_RF = D_iss['theta_iso_rf']
-    SBW_RF = D_iss['sbw_rf'] 
-    phiF = D_iss['phiF'] 
+    SBW_RF = D_iss['sbw_rf']
+    phiF = D_iss['phiF']
     rF = D_iss['rFresnel']
     lr = D_iss['lr']
     ld = D_iss['ld']
-    bandwidth_factor = D_iss['bandwidth_factor'] 
-    source_size_factor = D_iss['source_size_factor'] 
+    bandwidth_factor = D_iss['bandwidth_factor']
+    source_size_factor = D_iss['source_size_factor']
     mr = D_iss['mr']
     md = D_iss['md']
     mdp = D_iss['mdp']
     mg = D_iss['mg']
     gmedian = D_iss['gmedian']
-    stypelab = D_iss['stypelab'] 
-    pdftypelab = D_iss['pdftypelab'] 
-    pdflabel = D_iss['pdflabel'] 
+    stypelab = D_iss['stypelab']
+    pdftypelab = D_iss['pdftypelab']
+    pdflabel = D_iss['pdflabel']
     scattype = D_iss['scattype']
-    SCINTIME_RF =  D_iss['scintime_rf'] 
+    SCINTIME_RF =  D_iss['scintime_rf']
 
     p80 = 0.8
     g80low = invert_function(gvec, gcdf, (1.-p80)/2.)
     g80high = invert_function(gvec, gcdf, (1.+p80)/2.)
-      
+
     p90 = 0.9
     g90low = invert_function(gvec, gcdf, (1.-p90)/2.)
     g90high = invert_function(gvec, gcdf, (1.+p90)/2.)
-      
+
     p98 = 0.98
     g98low = invert_function(gvec, gcdf, (1.-p98)/2.)
     g98high = invert_function(gvec, gcdf, (1.+p98)/2.)
-      
+
     p998 = 0.998
     g998low = invert_function(gvec, gcdf, (1.-p998)/2.)
     g998high = invert_function(gvec, gcdf, (1.+p998)/2.)
-      
+
     p9998 = 0.9998
 
     g9998low = invert_function(gvec, gcdf, (1.-p9998)/2.)
     g9998high = invert_function(gvec, gcdf, (1.+p9998)/2.)
-      
+
     print(\
        "%6.1f %5.1f %4.1f %4.1f %7.1f %7.1f %6.3e %6.2f %4.1e %5.2f \
        %8.4e %8.2f %5.2f %5.2f %5.2f %4.3e %6.3e %6.3e %6.3e %5.3f \
@@ -614,7 +614,7 @@ def main(l, b, RF, BW, dxgal_mpc, theta_source, SM, DMmodel, doplot=False):
          bandwidth_factor, mr, md, mg, gmedian,\
          g80low, g80high,g90low, g90high, g98low, g98high, \
          g998low, g998high,g9998low, g9998high,\
-         stypelab, pdftypelab), file=fout) 
+         stypelab, pdftypelab), file=fout)
 
     print( "DM = ", DMmodel)
     print( "SM = ", SM)
@@ -624,8 +624,8 @@ def main(l, b, RF, BW, dxgal_mpc, theta_source, SM, DMmodel, doplot=False):
 
     print( "phiF = ", phiF, " md = ", md, " mr = ", mr, " mg = ", mg, " SBW = ", SBW_RF, " bw_fac = ", bandwidth_factor)
 
-    print("%6.1f %5.1f %4.1f %4.1f %7.1f %7.1f  %4.1e %5.2f %7.1f %4.1f %4.1f %4.1f %4.3e  %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f"%(l,b,RF,BW, NU_T, DMmodel, SM, Deff, phiF, np.log10(rF), np.log10(lr), np.log10(ld), bandwidth_factor,  mg, gmedian, g80low, g80high, g90low, g90high, g98low, g98high,g998low, g998high,g9998low, g9998high), file=gout) 
-       
+    print("%6.1f %5.1f %4.1f %4.1f %7.1f %7.1f  %4.1e %5.2f %7.1f %4.1f %4.1f %4.1f %4.3e  %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f"%(l,b,RF,BW, NU_T, DMmodel, SM, Deff, phiF, np.log10(rF), np.log10(lr), np.log10(ld), bandwidth_factor,  mg, gmedian, g80low, g80high, g90low, g90high, g98low, g98high,g998low, g998high,g9998low, g9998high), file=gout)
+
     fout.close()
     gout.close()
     hout.close()
@@ -728,9 +728,9 @@ def main(l, b, RF, BW, dxgal_mpc, theta_source, SM, DMmodel, doplot=False):
       savefig('xgal_mw_iss_cdf_l_' + str(l) + '_b_' + str(b) + '_rf_' + str(RF) + '.pdf')
 
       print( "Plotting Complementary CDF")
-      doextremes_default = True 
+      doextremes_default = True
       #doextremes = bool(input('Plot extreme value examples? [%s]: '%(doextremes_default)) or str(doextremes_default))
-      
+
 
       # CCDF = 1 - CDF
       fig = figure()
@@ -753,9 +753,9 @@ def main(l, b, RF, BW, dxgal_mpc, theta_source, SM, DMmodel, doplot=False):
       plot((gmedian, gmedian), (cc,0.5), 'k', dashes=[20,5], lw=1)
 
       idx = np.where((g90low <= gvec) & (gvec <=g90high))
-      # idx contains a lot of points (for sample interval used on gvec) 
-      # so the plot file ends up being very large.   Therefore just use 
-      # the edges and midpoint. 
+      # idx contains a lot of points (for sample interval used on gvec)
+      # so the plot file ends up being very large.   Therefore just use
+      # the edges and midpoint.
 
       i00 = idx[0][0]
       i0half = idx[0][np.int(np.size(idx)/2)]
@@ -812,7 +812,7 @@ def main(l, b, RF, BW, dxgal_mpc, theta_source, SM, DMmodel, doplot=False):
 
            legend(loc=(0.675, 0.5))
       show()
-      if fill90: 
+      if fill90:
          savefig('xgal_mw_iss_ccdf_l_' + str(l) + '_b_' + str(b) + '_rf_' + str(RF) + '_bw_' + str(BW) + '_fill'  + '.pdf')
       else:
          savefig('xgal_mw_iss_ccdf_l_' + str(l) + '_b_' + str(b) + '_rf_' + str(RF) + '_bw_' + str(BW) + '.pdf')
@@ -834,10 +834,10 @@ if __name__ == "__main__":
         #print narg, arg
         if  narg == 1: l = float(arg)
         if narg == 2: b = float(arg)
-        if narg == 3: RF = float(arg) 
-        if narg == 4: BW = float(arg) 
-        if narg == 5: dxgal_mpc = float(arg) 
-        if narg == 6: theta_source = float(arg) 
+        if narg == 3: RF = float(arg)
+        if narg == 4: BW = float(arg)
+        if narg == 5: dxgal_mpc = float(arg)
+        if narg == 6: theta_source = float(arg)
         if narg == 7: doplot = arg
         narg += 1
     narg -= 1
@@ -863,4 +863,3 @@ if __name__ == "__main__":
                   RF, BW, RF_input, TAU, THETA_X, Deff, SM,
                   theta_source=1.e-6, dg=1.e-5, gmin=1.e-5, gmax=30.)
     main(l, b, RF, BW, dxgal_mpc, theta_source, SM, DMmodel)
-

@@ -26,21 +26,21 @@ from scipy.interpolate import CubicSpline
 from scipy.interpolate import UnivariateSpline
 from scipy.optimize import fsolve, root, brentq
 from scipy.optimize import minimize_scalar
-import mpmath as mp
 
-from matplotlib.pyplot import figure, subplots_adjust, plot, axis 
+from matplotlib.pyplot import figure, subplots_adjust, plot, axis
 from matplotlib.pyplot import xlabel, ylabel, title, annotate
 from matplotlib.pyplot import tick_params, legend, show, close, savefig
 
 import os
 import sys
 import argparse
+import importlib
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 
 from mwprop.get_constants_waveprop_scipy_version import *
 
-# Get parameter input 
+# Get parameter input
 from mwprop.nemod import ne_input
 
 # get some additional units from astropy
@@ -57,11 +57,11 @@ zeros = np.zeros
 
 deg2rad = np.deg2rad
 rad2deg = np.rad2deg
-sech2 = lambda z: mp.sech(z)**2
+sech2 = lambda z: 4.0 * np.exp(-2.0 * np.abs(z)) / (1.0 + np.exp(-2.0 * np.abs(z)))**2
 
 
 # Solar system to Galactic center distance (kpc) set here
-rsun = 8.5                              
+rsun = 8.5
 
 # Reference radio frequency for calculating chromatic quantities
 rf_ref = 1.             # GHz
@@ -70,7 +70,7 @@ rf_ref = 1.             # GHz
 vperp = 100             # km/s
 
 # Default spectral index for electron density wavenumber spectrum
-sikol = 11/3                                            # spectral index 
+sikol = 11/3                                            # spectral index
 
 # Reference outer scale for Kolmogorov spectrum
 louter = 1              # pc
@@ -113,7 +113,7 @@ def setup_spiral_arms(Ncoarse=20, narmpoints=500, drfine=0.01):
 
         armmap = np.array([1, 3, 4, 2, 5])
         Darmmap = {}
-        for j in range(narms): 
+        for j in range(narms):
             Darmmap[str(j)] = armmap[j]
 
         """
@@ -226,10 +226,10 @@ def setup_spiral_arms(Ncoarse=20, narmpoints=500, drfine=0.01):
 
 # General parameters for model
 
-"""
+r"""
 Values and coefficients for a 3D Kolmogorov spectrum
 
-For SM modeling (as in NE2001): 
+For SM modeling (as in NE2001):
 Units conversion for SM in kpc m^{-20/3} and for outer scale in pc
 i.e. SM \propto distance x l_o^{-2/3} x n_e^2
 so with distance in kpc,  l_o in pc, and n_e in cm^{-3} we get
@@ -243,10 +243,10 @@ c_u = (l_o in cm)^{-2/3} x (n_e in cm^{-3})^2 x (cm per m)^{20/3}
     \simeq 10.165
 
 For straight units conversion from kpc m^{-20/3} to cm^{-17/3}
-we have 
+we have
      SMunit (cgs)  = kpc*10.**(-40./3.)             # kpc m^-20/3 to cgs
 defined in get_constants_waveprop_astropy.py (and scipy version)
-We don't use this in the NE2001 modeling code.. 
+We don't use this in the NE2001 modeling code..
 """
 c_sm = (sikol-3) / (2 * (2*pi)**(4-sikol))              # ~ 0.181
 c_u_units = ((1 * u.m)**(20/3) / (u.pc)**(2/3))         # using astropy units
@@ -368,11 +368,11 @@ nelpI,dnelpI,FlpI,dFlpI =  [Dlism[x] for x in ['nelpI','dnelpI','FlpI','dFlpi']]
 ylpImin = ylpI - rlpI - drlpI
 ylpImax = ylpI + rlpI + drlpI
 
-# y_lism_min = minimum y value for LISM components to matter 
-# y_lism_max = maximum y value for LISM components to matter 
+# y_lism_min = minimum y value for LISM components to matter
+# y_lism_max = maximum y value for LISM components to matter
 
-y_lism_min = min((yldrmin, ylsbmin, ylhbmin, ylpImin)) 
-y_lism_max = max((yldrmax, ylsbmax, ylhbmax, ylpImax)) 
+y_lism_min = min((yldrmin, ylsbmin, ylhbmin, ylpImin))
+y_lism_max = max((yldrmax, ylsbmax, ylhbmax, ylpImax))
 
 
 
@@ -473,3 +473,226 @@ cc12 = c1*c2
 ss12 = s1*s2
 cs21 = c2*s1
 cs12 = c1*s2
+
+
+def set_model(model: str):
+    """Set NE2001/NE2025 model and refresh all dependent globals.
+
+    Args:
+        model: One of 'ne2001' or 'ne2025'.
+    """
+    global eval_NE2001, eval_NE2025
+    global Dgal, Dgc, Dlism, Dclumps, Dvoids, Darms, Darmmap, armmap
+    global r1, th1, th1deg, coarse_arms, rarray, tharray
+    global armsplines, armarray, tangents, normals, curvatures
+    global wg1, wg2, wga, wggc, wglism, wgcN, wgvN
+    global n1h1, h1, A1, F1, n2, h2, A2, F2, na, ha, wa, Aa, Fa
+    global apldr, bpldr, cpldr, dpldr, yldrmin, yldrmax
+    global aplsb, bplsb, cplsb, dplsb, ylsbmin, ylsbmax
+    global alhb, blhb, clhb, xlhb, ylhb, zlhb, thetalhb, nelhb0, Flhb, ylhbmin, ylhbmax
+    global xlpI, ylpI, zlpI, rlpI, drlpI, nelpI, dnelpI, FlpI, dFlpI
+    global y_lism_min, y_lism_max
+    global xgc, ygc, zgc, rgc, hgc, negc0, Fgc0
+    global nclumps, lc, bc, nec, Fc, dc, rc, edgec, slc, clc, sbc, cbc, xc, yc, zc, rcmult
+    global nvoids, lv, bv, dv, nev, Fv, aav, bbv, ccv, thvy, thvz, edgev
+    global slv, clv, sbv, cbv, xv, yv, zv, s1, c1, s2, c2, cc12, ss12, cs21, cs12
+
+    model_key = model.lower().strip()
+    if model_key not in ('ne2001', 'ne2025'):
+        raise RuntimeError("Model must be ne2001 or ne2025.")
+
+    if ((model_key == 'ne2001' and eval_NE2001) or (model_key == 'ne2025' and eval_NE2025)) and 'Darms' in globals():
+        return
+
+    # Write model selector used by ne_input.read_nemod_parameters()
+    inpdir = os.path.dirname(os.path.realpath(__file__)) + '/params/'
+    with open(inpdir + "which_model.inp", "w") as f:
+        f.write("NE2001" if model_key == 'ne2001' else "NE2025")
+
+    # Force reload of model parameters and spiral arm arrays
+    if 'Darms' in globals():
+        del Darms
+
+    Dgal, Dgc, Dlism, Dclumps, Dvoids, Darms, Darmmap, \
+        armmap, r1, th1, th1deg, coarse_arms, rarray, tharray, armsplines, armarray, \
+        tangents, normals, curvatures, eval_NE2025, eval_NE2001 = setup_spiral_arms(Ncoarse=Ncoarse)
+
+    # Weights of density components
+    wg1 = Dgal['wg1']
+    wg2 = Dgal['wg2']
+    wga = Dgal['wga']
+    wggc = Dgal['wggc']
+    wglism = Dgal['wglism']
+    wgcN = Dgal['wgcN']
+    wgvN = Dgal['wgvN']
+
+    # Main component parameters
+    n1h1 = Dgal['n1h1']
+    h1 = Dgal['h1']
+    A1 = Dgal['A1']
+    F1 = Dgal['F1']
+    n2 = Dgal['n2']
+    h2 = Dgal['h2']
+    A2 = Dgal['A2']
+    F2 = Dgal['F2']
+    na = Dgal['na']
+    ha = Dgal['ha']
+    wa = Dgal['wa']
+    Aa = Dgal['Aa']
+    Fa = Dgal['Fa']
+
+    # Local ISM components
+    aldr, bldr, cldr = [Dlism[x] for x in ['aldr', 'bldr', 'cldr']]
+    xldr, yldr, zldr = [Dlism[x] for x in ['xldr', 'yldr', 'zldr']]
+    thetaldr, neldr0, Fldr = [Dlism[x] for x in ['thetaldr', 'neldr', 'Fldr']]
+    thetaldr = deg2rad(thetaldr)
+    sthldr = np.sin(thetaldr)
+    cthldr = np.cos(thetaldr)
+    apldr = (cthldr/aldr)**2 + (sthldr/bldr)**2
+    bpldr = (sthldr/aldr)**2 + (cthldr/bldr)**2
+    cpldr = 1./cldr**2
+    dpldr = 2.*cthldr*sthldr*(1./aldr**2 - 1./bldr**2)
+    yldrmin = yldr - max(aldr, bldr, cldr)
+    yldrmax = yldr + max(aldr, bldr, cldr)
+
+    alsb, blsb, clsb = [Dlism[x] for x in ['alsb', 'blsb', 'clsb']]
+    xlsb, ylsb, zlsb = [Dlism[x] for x in ['xlsb', 'ylsb', 'zlsb']]
+    thetalsb, nelsb0, Flsb = [Dlism[x] for x in ['thetalsb', 'nelsb', 'Flsb']]
+    thetalsb = deg2rad(thetalsb)
+    sthlsb = np.sin(thetalsb)
+    cthlsb = np.cos(thetalsb)
+    aplsb = (cthlsb/alsb)**2 + (sthlsb/blsb)**2
+    bplsb = (sthlsb/alsb)**2 + (cthlsb/blsb)**2
+    cplsb = 1./clsb**2
+    dplsb = 2.*cthlsb*sthlsb*(1./alsb**2 - 1./blsb**2)
+    ylsbmin = ylsb - max(alsb, blsb, clsb)
+    ylsbmax = ylsb + max(alsb, blsb, clsb)
+
+    alhb, blhb, clhb = [Dlism[x] for x in ['alhb', 'blhb', 'clhb']]
+    xlhb, ylhb, zlhb = [Dlism[x] for x in ['xlhb', 'ylhb', 'zlhb']]
+    thetalhb, nelhb0, Flhb = [Dlism[x] for x in ['thetalhb', 'nelhb', 'Flhb']]
+    thetalhb = deg2rad(thetalhb)
+    ylhbmin = ylhb - max(alhb, blhb, clhb)
+    ylhbmax = ylhb + max(alhb, blhb, clhb)
+
+    xlpI, ylpI, zlpI = [Dlism[x] for x in ['xlpI', 'ylpI', 'zlpI']]
+    rlpI, drlpI = [Dlism[x] for x in ['rlpI', 'drlpI']]
+    nelpI, dnelpI, FlpI, dFlpI = [Dlism[x] for x in ['nelpI', 'dnelpI', 'FlpI', 'dFlpi']]
+    ylpImin = ylpI - rlpI - drlpI
+    ylpImax = ylpI + rlpI + drlpI
+    y_lism_min = min((yldrmin, ylsbmin, ylhbmin, ylpImin))
+    y_lism_max = max((yldrmax, ylsbmax, ylhbmax, ylpImax))
+
+    # Galactic center component
+    xgc = Dgc['xgc']
+    ygc = Dgc['ygc']
+    zgc = Dgc['zgc']
+    rgc = Dgc['rgc']
+    hgc = Dgc['hgc']
+    negc0 = Dgc['negc0']
+    Fgc0 = Dgc['Fgc0']
+
+    # Clumps
+    nclumps = len(Dclumps)
+    lc = np.zeros(len(Dclumps))
+    bc = np.zeros(len(Dclumps))
+    nec = np.zeros(len(Dclumps))
+    Fc = np.zeros(len(Dclumps))
+    dc = np.zeros(len(Dclumps))
+    rc = np.zeros(len(Dclumps))
+    edgec = np.zeros(len(Dclumps))
+    for n, i in enumerate(Dclumps):
+        lc[n] = Dclumps[i]['l']
+        bc[n] = Dclumps[i]['b']
+        nec[n] = Dclumps[i]['nec']
+        Fc[n] = Dclumps[i]['Fc']
+        dc[n] = Dclumps[i]['dc']
+        rc[n] = Dclumps[i]['rc']
+        edgec[n] = Dclumps[i]['edge']
+
+    slc = np.sin(deg2rad(lc))
+    clc = np.cos(deg2rad(lc))
+    sbc = np.sin(deg2rad(bc))
+    cbc = np.cos(deg2rad(bc))
+    rgalc = dc*cbc
+    xc = rgalc*slc
+    yc = rsun - rgalc*clc
+    zc = dc*sbc
+    rcmult = np.ones(np.shape(edgec))
+    rcmult[edgec==0] = 2.5
+    rcmult[edgec==1] = 1.1
+
+    # Voids
+    nvoids = len(Dvoids)
+    lv = np.zeros(len(Dvoids))
+    bv = np.zeros(len(Dvoids))
+    dv = np.zeros(len(Dvoids))
+    nev = np.zeros(len(Dvoids))
+    Fv = np.zeros(len(Dvoids))
+    aav = np.zeros(len(Dvoids))
+    bbv = np.zeros(len(Dvoids))
+    ccv = np.zeros(len(Dvoids))
+    thvy = np.zeros(len(Dvoids))
+    thvz = np.zeros(len(Dvoids))
+    edgev = np.zeros(len(Dvoids))
+    for n, i in enumerate(Dvoids):
+        lv[n] = Dvoids[i]['l']
+        bv[n] = Dvoids[i]['b']
+        dv[n] = Dvoids[i]['dv']
+        nev[n] = Dvoids[i]['nev']
+        Fv[n] = Dvoids[i]['Fv']
+        aav[n] = Dvoids[i]['aav']
+        bbv[n] = Dvoids[i]['bbv']
+        ccv[n] = Dvoids[i]['ccv']
+        thvy[n] = Dvoids[i]['thvy']
+        thvz[n] = Dvoids[i]['thvz']
+        edgev[n] = Dvoids[i]['edge']
+
+    slv = np.sin(deg2rad(lv))
+    clv = np.cos(deg2rad(lv))
+    sbv = np.sin(deg2rad(bv))
+    cbv = np.cos(deg2rad(bv))
+    rgalc = dv*cbv
+    xv = rgalc*slv
+    yv = rsun - rgalc*clv
+    zv = dv*sbv
+    s1 = np.sin(deg2rad(thvy))
+    c1 = np.cos(deg2rad(thvy))
+    s2 = np.sin(deg2rad(thvz))
+    c2 = np.cos(deg2rad(thvz))
+    cc12 = c1*c2
+    ss12 = s1*s2
+    cs21 = c2*s1
+    cs12 = c1*s2
+
+    _refresh_dependent_modules()
+
+
+def _refresh_dependent_modules():
+    """Reload modules that import config_nemod globals by value.
+
+    This ensures model switches propagate to modules that used
+    `from mwprop.nemod.config_nemod import *` at import time.
+    """
+    module_names = [
+        "mwprop.nemod.density_components",
+        "mwprop.nemod.ne_arms",
+        "mwprop.nemod.ne_lism",
+        "mwprop.nemod.neclumpN_fast",
+        "mwprop.nemod.nevoidN",
+        "mwprop.nemod.density",
+        "mwprop.nemod.dmdsm",
+    ]
+
+    for name in module_names:
+        module = sys.modules.get(name)
+        if module is not None:
+            importlib.reload(module)
+
+    # Refresh the GalaxyModel singleton so pre-computed arm arrays / splines
+    # stay in sync with the newly loaded model parameters.
+    # Lazy import prevents a circular dependency at module-load time
+    # (config_nemod must not import galaxy_model at the module level).
+    _gm = sys.modules.get('mwprop.nemod.galaxy_model')
+    if _gm is not None:
+        _gm.default_model.refresh()

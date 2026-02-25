@@ -6,7 +6,7 @@ ne_lism.py
 Local interstellar medium functions
 
 Replacements for Fortran functions in neLISM.NE2001.f:
-    ne_LISM(x,y,z,FLISM,wLISM)      ! total local ISM 
+    ne_LISM(x,y,z,FLISM,wLISM)      ! total local ISM
     neLDRQ1(x,y,z,FLDRQ1r,wLDRQ1)   ! Low Density Region in Q1
     neLSB(x,y,z,FLSBr,wLSB)         ! Local Super Bubble
     neLHB(x,y,z,FLHBr,wLHB)         ! Local Hot Bubble [not used]
@@ -16,7 +16,7 @@ Replacements for Fortran functions in neLISM.NE2001.f:
 Python version JMC 2020 Jan 27
 
 Changes:
-2022 Jan 02: 
+2022 Jan 02:
     1. added if statement to skip calculations for x,y values
        outside of LISM
     2. put precalculations of some parameters into config_ne2001p.py
@@ -30,7 +30,7 @@ c JMC 26 August-11 Sep. 2000
 c     25 October 2001: modified to change weighting scheme
 c                      so that the ranking is LHB: LSB: LDR
 c                      (LHB overrides LSB and LDR; LSB overrides LDR)
-c     16 November 2001: 
+c     16 November 2001:
 c           added Loop I component with weighting scheme
 c               LHB:LOOPI:LSB:LDR
 c               LHB   overides everything,
@@ -63,23 +63,23 @@ def ne_lism(x,y,z):
     Output:
         ne_LISM = electron density
         FLISM = fluctuation parameter
-        wLISM = weight for composite LISM 
+        wLISM = weight for composite LISM
         wLDR = weight for LDR region
         wLHB = weight for local hot bubble
-        wLSB = weight 
+        wLSB = weight
         wLOOPI = weight for radio loop I
 
     Based on original Fortran routine.
 
     Changes:
         2022 Jan 02:  put in test for y out of range of LISM; return zeros if so
-                      note: y_lism_min, y_lism_max computed in config_ne2001p.py 
+                      note: y_lism_min, y_lism_max computed in config_ne2001p.py
     """
 
     # Test whether input y is enclosed by LISM; if not set values to zero and return
 
     if y > y_lism_max or y < y_lism_min:
-        return 0, 0, 0, 0, 0, 0, 0 
+        return 0, 0, 0, 0, 0, 0, 0
 
     neldrq1xyz, FLDRQ1r, wLDR = neLDRQ1(x,y,z)    # low density region in Q1
     nelsbxyz, FLSBr, wLSB = neLSB(x,y,z)          # Local Super Bubble
@@ -307,7 +307,7 @@ def neLHB2(x,y,z):                        # Local Hot Bubble
     cc=clhb
     netrough=nelhb0
     Ftrough=Flhb
-    theta = thetalhb 
+    theta = thetalhb
     """
 
     neLHB2 = 0.
@@ -381,5 +381,93 @@ def neLOOPI(x,y,z):                      # Loop I
         wLOOPI = 1
 
     return neLOOPI, FLOOPI, wLOOPI
+
+# -----------------------------------------------------------------------------
+# ============================================================================
+# Vectorized (array) versions — accept 1-D numpy arrays x, y, z
+# ============================================================================
+
+def neLDRQ1_vec(x, y, z):
+    """Vectorized neLDRQ1: ellipsoidal LDR region."""
+    q = ((x - xldr)**2 * apldr
+         + (y - yldr)**2 * bpldr
+         + (z - zldr)**2 * cpldr
+         + (x - xldr) * (y - yldr) * dpldr)
+    mask = q <= 1
+    return np.where(mask, neldr0, 0.0), np.where(mask, Fldr, 0.0), mask.astype(float)
+
+
+def neLSB_vec(x, y, z):
+    """Vectorized neLSB: ellipsoidal Local Super Bubble."""
+    q = ((x - xlsb)**2 * aplsb
+         + (y - ylsb)**2 * bplsb
+         + (z - zlsb)**2 * cplsb
+         + (x - xlsb) * (y - ylsb) * dplsb)
+    mask = q <= 1
+    return np.where(mask, nelsb0, 0.0), np.where(mask, Flsb, 0.0), mask.astype(float)
+
+
+def neLHB2_vec(x, y, z):
+    """Vectorized neLHB2: cylindrical Local Hot Bubble with z-varying radius."""
+    yaxis = ylhb + np.tan(thetalhb) * z
+    # cylinder semi-axis aa shrinks linearly for z in [zlhb-clhb, 0]
+    denom = zlhb - clhb          # scalar, = -0.16 for default params (nonzero)
+    lhb2_cond = (z <= 0) & (z >= denom)
+    aa = np.where(lhb2_cond, 0.001 + (alhb - 0.001) * (1.0 - z / denom), alhb)
+    qxy = ((x - xlhb) / aa)**2 + ((y - yaxis) / blhb)**2
+    qz  = np.abs(z - zlhb) / clhb
+    mask = (qxy <= 1) & (qz <= 1)
+    return np.where(mask, nelhb0, 0.0), np.where(mask, Flhb, 0.0), mask.astype(float)
+
+
+def neLOOPI_vec(x, y, z):
+    """Vectorized neLOOPI: spheroidal Loop I (truncated for z < 0)."""
+    r = np.sqrt((x - xlpI)**2 + (y - ylpI)**2 + (z - zlpI)**2)
+    a2 = rlpI + drlpI
+    active  = (z >= 0) & (r <= a2)      # not outside
+    inside  = active   & (r <= rlpI)    # core
+    shell   = active   & ~inside        # boundary shell
+    neLOOPI_v = np.where(inside, nelpI,  np.where(shell, dnelpI, 0.0))
+    FLOOPI_v  = np.where(inside, FlpI,   np.where(shell, dFlpI,  0.0))
+    return neLOOPI_v, FLOOPI_v, active.astype(float)
+
+
+def ne_lism_vec(x, y, z):
+    """
+    Vectorized ne_lism: combines all four LISM sub-components with the same
+    hierarchical weighting as the scalar ne_lism().
+
+    Returns (ne_LISM, FLISM, wLISM, wLDR, wLHB, wLSB, wLOOPI) — all arrays.
+    """
+    out_of_range = (y > y_lism_max) | (y < y_lism_min)
+
+    neLDR_v,   FLDR_v,   wLDR_v   = neLDRQ1_vec(x, y, z)
+    neLSB_v,   FLSB_v,   wLSB_v   = neLSB_vec(x, y, z)
+    neLHB2_v,  FLHB_v,   wLHB_v   = neLHB2_vec(x, y, z)
+    neLOOPI_v, FLOOPI_v, wLOOPI_v = neLOOPI_vec(x, y, z)
+
+    ne_LISM_v = ((1 - wLHB_v) *
+                 ((1 - wLOOPI_v) * (wLSB_v * neLSB_v + (1 - wLSB_v) * neLDR_v)
+                  + wLOOPI_v * neLOOPI_v)
+                 + wLHB_v * neLHB2_v)
+
+    FLISM_v = ((1 - wLHB_v) *
+               ((1 - wLOOPI_v) * (wLSB_v * FLSB_v + (1 - wLSB_v) * FLDR_v)
+                + wLOOPI_v * FLOOPI_v)
+               + wLHB_v * FLHB_v)
+
+    wLISM_v = np.maximum(wLOOPI_v, np.maximum(wLDR_v, np.maximum(wLSB_v, wLHB_v)))
+
+    # Zero out points outside the LISM bounding box
+    z0 = np.zeros_like(ne_LISM_v)
+    ne_LISM_v = np.where(out_of_range, z0, ne_LISM_v)
+    FLISM_v   = np.where(out_of_range, z0, FLISM_v)
+    wLISM_v   = np.where(out_of_range, z0, wLISM_v)
+    wLDR_v    = np.where(out_of_range, z0, wLDR_v)
+    wLHB_v    = np.where(out_of_range, z0, wLHB_v)
+    wLSB_v    = np.where(out_of_range, z0, wLSB_v)
+    wLOOPI_v  = np.where(out_of_range, z0, wLOOPI_v)
+
+    return ne_LISM_v, FLISM_v, wLISM_v, wLDR_v, wLHB_v, wLSB_v, wLOOPI_v
 
 # -----------------------------------------------------------------------------

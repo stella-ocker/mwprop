@@ -3,7 +3,7 @@
 """
 NE2025 master script
 
-Usage: 
+Usage:
     command line:  python NE2025.py l b DM_D ndir [-h]
     in ipython:    run NE2025.py l b DM_D ndir [-h]
     in script:     Dv, Du, Dd = ne2025(l, b, DM_D, ndir)
@@ -12,11 +12,11 @@ Usage:
 Change Log:
 
 01/16/2020 initial code sent from SKO --> JMC
-01/29/2020 JMC -- mods to make compatible with other new Python modules 
-02/08/2020 JMC -- add import of ne2001p_config  
+01/29/2020 JMC -- mods to make compatible with other new Python modules
+02/08/2020 JMC -- add import of ne2001p_config
 02/11/2020 JMC -- turn into function + main()
-17/12/2020 JMC -- added plotting Cn^2 vs d 
-01/05/2022 JMC -- moved some definitions to ne2001p_config file, redefined nu -> rf_nu 
+17/12/2020 JMC -- added plotting Cn^2 vs d
+01/05/2022 JMC -- moved some definitions to ne2001p_config file, redefined nu -> rf_nu
 01/07/2022 JMC -- restructured to use new dmdsm routines,
                   ddmdsm_dm2d_ne2001.py and mdsm_d2dm_ne2001.py
 01/09/2022 JMC -- restructed to take plotting outside of the ne2001 function
@@ -34,18 +34,9 @@ global eval_NE2025,eval_NE2001
 eval_NE2025 = True
 eval_NE2001 = False
 
-# set which_model.inp
-inpdir = os.path.dirname(os.path.realpath(__file__))+'/params/'
-with open(inpdir+"which_model.inp", "w") as f:
-    f.write("NE2025")
-f.close()
-#with open(inpdir+"which_model.inp", "r") as f:
-#    print(f.read())
-#f.close()
-
 
 # ------------------------------------------------------------
-# config_nemod sets up the model with all dictionaries etc: 
+# config_nemod sets up the model with all dictionaries etc:
 # ------------------------------------------------------------
 from mwprop.nemod.config_nemod import *
 
@@ -75,7 +66,7 @@ Options:
 - Classic option: all output in regular format
 - DM->D or D->DM only: no scattering output
 - do_analysis option: diagnostic LoS info (slows down the calculation); written to f24, f25 files
-- extragalactic LoS: 
+- extragalactic LoS:
     * A specified D > 300 kpc (say) implies extragalactic (beyond MW halo)
     * option to include halo estimate of DM
 Help file: print out assumptions and other info about the code (README file?)
@@ -100,12 +91,11 @@ global xlpI, ylpI, zlpI, rlpI, drlpI, nelpI, dnelpI, FlpI, dFlpI
 global y_lism_min, y_lism_max
 global xgc, ygc, zpgc, rgc, hgc, negc0, Fgc0
 
-
 # --------------------------------------------------------------------
 
-def ne2025(ldeg, bdeg, dmd, ndir, 
-    classic=True, dmd_only=True, 
-    do_analysis=False, plotting=False, verbose=False, debug=False,eval_NE2001=False,eval_NE2025=True):
+def ne2025(ldeg, bdeg, dmd, ndir,
+    classic=True, dmd_only=True,
+    do_analysis=False, plotting=False, verbose=False, debug=False):
     """
     Calculates d from DM or DM from d for ndir >= 0 or ndir < 0
 
@@ -118,15 +108,16 @@ def ne2025(ldeg, bdeg, dmd, ndir,
     dmd_only = True     => compute only DM or distance, no scattering quantities
     classic = True      => print output in format as in Fortran version
     do_analysis = True  => calculate and output diagnostic quantities for the line of sight
-    plotting = True     => plot DM vs distance along LoS, SM also if dmd_only = False     
-    verbose = True      => print results to std out 
-                           (note not same as 'verbose' internal to functions 
+    plotting = True     => plot DM vs distance along LoS, SM also if dmd_only = False
+    verbose = True      => print results to std out
+                           (note not same as 'verbose' internal to functions
 
     Output: two types:
-        Classic: All input and output quantities for DM/D, scattering, scintillations, 
+        Classic: All input and output quantities for DM/D, scattering, scintillations,
                                             emission measure, ...
         Dictionaries for output quantities.
     """
+    set_model('ne2025')
 
     if do_analysis or plotting: # make directory for outputs (need this block here for script calls to ne2001())
         try:
@@ -156,9 +147,9 @@ def ne2025(ldeg, bdeg, dmd, ndir,
     if ndir >= 0:
         dm_target = dmd
         #limit, distmodel, dmpsr, sm, smtau, smtheta, smiso \
-        model_out =  dmdsm_dm2d(deg2rad(ldeg), deg2rad(bdeg), dm_target, 
-                     ds_coarse=ds_coarse, ds_fine=ds_fine, Nsmin=10, 
-                     dm2d_only=dmd_only, do_analysis=do_analysis, 
+        model_out =  dmdsm_dm2d(deg2rad(ldeg), deg2rad(bdeg), dm_target,
+                     ds_coarse=ds_coarse, ds_fine=ds_fine, Nsmin=10,
+                     dm2d_only=dmd_only, do_analysis=do_analysis,
                      plotting=plotting, verbose=verbose, debug=debug)
         limit_d = model_out[0]
         d_mod = model_out[1]
@@ -171,10 +162,10 @@ def ne2025(ldeg, bdeg, dmd, ndir,
         dlabel = 'ModelDistance'
 
         if dmd_only is False:           # => scattering parameters are calculated
-            sm = model_out[3] 
-            smtau = model_out[4] 
-            smtheta = model_out[5] 
-            smiso = model_out[6] 
+            sm = model_out[3]
+            smtau = model_out[4]
+            smtheta = model_out[5]
+            smiso = model_out[6]
 
     # ---------------------------
     # Calculate DM from distance:
@@ -183,7 +174,7 @@ def ne2025(ldeg, bdeg, dmd, ndir,
         d_target = dmd
         model_out = dmdsm_d2dm(deg2rad(ldeg), deg2rad(bdeg), d_target,
                     ds_coarse=ds_coarse, ds_fine=ds_fine, Nsmin=10,
-                    d2dm_only=dmd_only, do_analysis=do_analysis, 
+                    d2dm_only=dmd_only, do_analysis=do_analysis,
                     plotting=plotting, verbose=verbose)
 
         # The first three entries in model_out are limit, d, and dm for all cases
@@ -192,10 +183,10 @@ def ne2025(ldeg, bdeg, dmd, ndir,
         dm_mod = model_out[2]
 
         if dmd_only is False:           # => scattering parameters are calculated
-            sm = model_out[3] 
-            smtau = model_out[4] 
-            smtheta = model_out[5] 
-            smiso = model_out[6] 
+            sm = model_out[3]
+            smtau = model_out[4]
+            smtheta = model_out[5]
+            smiso = model_out[6]
 
 
         dmlabel = 'ModelDM'
@@ -213,7 +204,7 @@ def ne2025(ldeg, bdeg, dmd, ndir,
 
     # Also print out scattering, scintillation etc. parameters if requested
     if dmd_only is False:
-        tau = sf.tauiss(d_mod, smtau, rf_ref)               
+        tau = sf.tauiss(d_mod, smtau, rf_ref)
         sbw = sf.scintbw(d_mod, smtau, rf_ref)
         stime = sf.scintime(smtau, rf_ref, vperp)
         theta_x = sf.theta_xgal(sm, rf_ref)
@@ -261,7 +252,7 @@ def ne2025(ldeg, bdeg, dmd, ndir,
 
         Dkeynames = np.array(['l', 'b', 'DM/D', 'ndir', 'limdist', 'DIST', 'DM', 'DMz'])
 
-        Dkeyunits = np.array(['deg', 'deg', 'pc-cm^{-3}_or_kpc', 
+        Dkeyunits = np.array(['deg', 'deg', 'pc-cm^{-3}_or_kpc',
             '1:DM->D;-1:D->DM', 'blank_or_>>', 'kpc', 'pc-cm^{-3}', 'pc-cm^{-3}'])
 
         Dkeydesc = np.array(['GalacticLongitude', 'GalacticLatitude', 'Input_DM_or_Distance',
@@ -277,15 +268,15 @@ def ne2025(ldeg, bdeg, dmd, ndir,
     else:
     # DM, distance, and scattering output:
 
-        Dkeyvalues = list([ldeg, bdeg, dmd, ndir, limit_d, d_mod, dm_mod, dmz, 
-            sm, smtau, smtheta, smiso, tau, sbw, stime, theta_g, theta_x, 
+        Dkeyvalues = list([ldeg, bdeg, dmd, ndir, limit_d, d_mod, dm_mod, dmz,
+            sm, smtau, smtheta, smiso, tau, sbw, stime, theta_g, theta_x,
             transfreq, emsm, deffsm2, tau_x, sbw_x])
 
-        Dkeynames = np.array(['l', 'b', 'DM/D', 'ndir', 'limdist', 'DIST', 'DM', 'DMz', 
-            'SM', 'SMtau', 'SMtheta', 'SMiso', 'TAU', 'SBW', 'SCINTIME', 'THETA_G', 'THETA_X', 
+        Dkeynames = np.array(['l', 'b', 'DM/D', 'ndir', 'limdist', 'DIST', 'DM', 'DMz',
+            'SM', 'SMtau', 'SMtheta', 'SMiso', 'TAU', 'SBW', 'SCINTIME', 'THETA_G', 'THETA_X',
             'NU_T', 'EM', 'DEFFSM2', 'TAU_X', 'SBW_X'])
 
-        Dkeyunits = np.array(['deg', 'deg', 'pc-cm^{-3}_or_kpc', '1:DM->D;-1:D->DM', 
+        Dkeyunits = np.array(['deg', 'deg', 'pc-cm^{-3}_or_kpc', '1:DM->D;-1:D->DM',
             'blank_or_>>', 'kpc', 'pc-cm^{-3}', 'pc-cm^{-3}', 'kpc-m^{-20/3}', 'kpc-m^{-20/3}',
            'kpc-m^{-20/3}', 'kpc-m^{-20/3}',  'ms', 'MHz', 's',
            'mas', 'mas', 'GHz', 'pc-cm^{-6}', 'kpc', 'ms', 'MHz'])
@@ -296,7 +287,7 @@ def ne2025(ldeg, bdeg, dmd, ndir,
            'SM_GalAngularBroadening', 'SM_IsoplanaticAngle',
            'PulseBroadening@1GHz', 'ScintBW@1GHz',
            'ScintTime@1GHz@100km/s', 'AngBroadeningGal@1GHz', 'AngBroadeningXgal@1GHz',
-           'TransitionFrequency', 'EmissionMeasure_from_SM@outer1pc', 
+           'TransitionFrequency', 'EmissionMeasure_from_SM@outer1pc',
            'EffectiveScreenDistance', 'XGalPulseBroadening@1GHz', 'XGalScintBW@1GHz'])
 
         for n, key in enumerate(Dkeynames):
@@ -315,11 +306,11 @@ def plot_dm_ne_cn2_vs_d(Dv, f25file = 'f25_dm2d_ne_dsm_vs_s.txt'):
        DMmax = dmvss.max()
 
        # For plot labels:
-       dm = Dv['DM']                    
+       dm = Dv['DM']
        deffsm2 = Dv['DEFFSM2']
        ldeg = Dv['l']
        bdeg = Dv['b']
-           
+
        indmax = np.where(ne != 0)[0][-1]
        indkeep = min(int(1.1*indmax), np.size(ne))
        s = s[0:indkeep]
@@ -336,7 +327,7 @@ def plot_dm_ne_cn2_vs_d(Dv, f25file = 'f25_dm2d_ne_dsm_vs_s.txt'):
        ax = fig.add_subplot(311)
        plot(s, dmvss)
        ylabel(r'$\rm DM \ (pc\ cm^{-3}) $', fontsize=13)
-       annotate(r'$l = %6.1f^{\circ}  \ \ b = %5.1f$'%(ldeg, bdeg), 
+       annotate(r'$l = %6.1f^{\circ}  \ \ b = %5.1f$'%(ldeg, bdeg),
            xy=(0.025, 0.875), xycoords='axes fraction', ha='left', va='center', fontsize=10)
        title(r'$\overline{d}_{n_e} = %8.2f \ \ \ \ \ \overline{d}_{n_e^2} = %8.2f \ \ \ \ \ \overline{d}_{\rm SM} = %8.2f \ \ \ \ \ {\rm DM_{max}} =  %8.2f$'%(dbar_ne, dbar_ne2, deffsm2, DMmax))
        tick_params(labelbottom = False)
@@ -371,7 +362,7 @@ if __name__ == '__main__':
     # If 'explain' option is set, print out README file and exit.
     if '-e' in sys.argv or '--explain' in sys.argv:
          script_path = os.path.dirname(os.path.realpath(__file__)) # SKO -- so that README will always be found
-         infile = script_path+'/README.txt' # removed ne2001p 
+         infile = script_path+'/README.txt' # removed ne2001p
          with open(infile) as fexplain:
              print(fexplain.read())
              fexplain.close()
@@ -386,24 +377,24 @@ if __name__ == '__main__':
         parser.add_argument('DM_D',help='DM (pc cm^{-3}) or distance (kpc)')
         parser.add_argument('ndir',help='ndir = 1 (DM->D), ndir = -1 (D->DM)')
 
-        parser.add_argument('-a', '--analysis', action='store_true', 
+        parser.add_argument('-a', '--analysis', action='store_true',
             help='Do line of sight analysis')
 
-        parser.add_argument('-p', '--plotting', action='store_true', 
+        parser.add_argument('-p', '--plotting', action='store_true',
             help='Do diagnostic plotting')
 
-        parser.add_argument('-s', '--scattering', action='store_true', 
+        parser.add_argument('-s', '--scattering', action='store_true',
             help='Calculate scattering and scintillation parameters')
 
-        parser.add_argument('-m', '--modern', action='store_true', 
+        parser.add_argument('-m', '--modern', action='store_true',
             help='Modern output (turns off classic output like Fortran version)')
 
-        parser.add_argument('-v', '--verbose', action='store_true', 
+        parser.add_argument('-v', '--verbose', action='store_true',
             help='Verbose output (classic output of Fortran version)')
 
-        parser.add_argument('-b', '--debug', action='store_true', 
+        parser.add_argument('-b', '--debug', action='store_true',
             help='debug output')
-            
+
         args = parser.parse_args()
 
 
@@ -425,14 +416,14 @@ if __name__ == '__main__':
     modern = args.modern
     eval_NE2001 = False
     eval_NE2025 = True
-    
+
     if modern:
         classic = False
     else:
         classic = True
 
-    Dn, Dv, Du, Dd = ne2001(ldeg, bdeg, dmd, ndir, 
-        classic=classic, verbose=verbose, dmd_only=dmd_only, 
+    Dn, Dv, Du, Dd = ne2001(ldeg, bdeg, dmd, ndir,
+        classic=classic, verbose=verbose, dmd_only=dmd_only,
         do_analysis=True, plotting=do_plotting, debug=debug,eval_NE2001=eval_NE2001,eval_NE2025=eval_NE2025)
 
     if calc_scattering and do_plotting:
@@ -441,4 +432,3 @@ if __name__ == '__main__':
 
         input('hit return')
         close('all')
-
