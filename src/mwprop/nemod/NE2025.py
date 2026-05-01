@@ -1,4 +1,4 @@
-# mwprop v2.0 Jan 2026
+# mwprop v2.0.1 May 2026
 
 """
 NE2025 master script
@@ -26,6 +26,7 @@ Change Log:
 11/27/2023 SKO -- corrected clump filtering, modified rcmult
 12/14/2023 SKO -- all output files (plots, text files) now save to 'output_ne2001p' directory in user's current working directory
 01/09/2026 SKO -- NE2001.py and NE2025.py now separate master scripts
+05/01/2026 SKO -- fixed error returned by __main__
 """
 
 import sys,os
@@ -431,7 +432,7 @@ if __name__ == '__main__':
     else:
         classic = True
 
-    Dn, Dv, Du, Dd = ne2001(ldeg, bdeg, dmd, ndir, 
+    Dn, Dv, Du, Dd = ne2025(ldeg, bdeg, dmd, ndir, 
         classic=classic, verbose=verbose, dmd_only=dmd_only, 
         do_analysis=True, plotting=do_plotting, debug=debug,eval_NE2001=eval_NE2001,eval_NE2025=eval_NE2025)
 

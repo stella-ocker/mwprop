@@ -1,4 +1,4 @@
-# mwprop v2.0 Jan 2026
+# mwprop v2.0.1 May 2026
 
 """
 dmdsm.py
@@ -13,6 +13,7 @@ This version is for both NE2025 and NE2001p = Python version of NE2001 (fortran)
 JMC 2021 Dec 28 - 2022 Jan 05
 SKO 2022 Mar - 2023 Nov
 JMC 2023 Dec 31 
+SKO 2026 May 01 - switched trapz to cumulative_trapezoid
 
 This version includes:
     1. Use of coarse sampling + spline interpolation of smooth density components 
@@ -39,6 +40,7 @@ from numpy import log10
 from numpy import array, linspace, where, size
 from numpy import digitize, interp
 from scipy.interpolate import interp1d
+from scipy.integrate import cumulative_trapezoid
 
 from mwprop.nemod.config_nemod import *
 from mwprop.nemod.density import *
@@ -272,7 +274,7 @@ def dmdsm_dm2d(l, b, dm_target, ds_coarse=0.1, ds_fine=0.01, Nsmin=20,
     	print('ne',ne)
     	#print('hitvoid:',hitvoid)
     # Integrate using trapz to get cumulative DM:
-    dm_cumulate_vec = pc_in_kpc * array([trapz(ne[:j], sf_vec[:j]) for j in range(1,Ns_fine+1)])
+    dm_cumulate_vec = pc_in_kpc * cumulative_trapezoid(ne, sf_vec, initial=0.0)
     dm_calc_max = dm_cumulate_vec[-1]       # maximum dm calculated 
 
     if debug:
@@ -353,13 +355,10 @@ def dmdsm_dm2d(l, b, dm_target, ds_coarse=0.1, ds_fine=0.01, Nsmin=20,
         # First integrate over sf_vec then use cubic spline to find SM at d = dhat.
 
         Nsf1 = np.size(sf_vec) + 1
-        dsm_cumulate1_vec = array([trapz(dsm[:j], sf_vec[:j]) for j in range(1, Nsf1)])
-        dsm_cumulate2_vec = \
-            array([trapz(sf_vec[:j]*dsm[:j], sf_vec[:j]) for j in range(1, Nsf1)])
-        dsm_cumulate3_vec = \
-            array([trapz(sf_vec[:j]**2*dsm[:j], sf_vec[:j]) for j in range(1, Nsf1)])
-        dsm_cumulate4_vec = \
-            array([trapz(sf_vec[:j]**sm_iso_index*dsm[:j], sf_vec[:j]) for j in range(1, Nsf1)])
+        dsm_cumulate1_vec = cumulative_trapezoid(dsm, sf_vec, initial=0.0) 
+        dsm_cumulate2_vec = cumulative_trapezoid(sf_vec*dsm, sf_vec, initial=0.0)
+        dsm_cumulate3_vec = cumulative_trapezoid(sf_vec**2*dsm, sf_vec, initial=0.0)
+        dsm_cumulate4_vec = cumulative_trapezoid(sf_vec**sm_iso_index*dsm, sf_vec, initial=0.0)
 
         sm_cumulate = sm_factor * dsm_cumulate1_vec
         smtau_cumulate = 6 * (sm_factor/dhat) * (dsm_cumulate2_vec - dsm_cumulate3_vec/dhat)
@@ -508,8 +507,7 @@ def dmdsm_d2dm(l, b, d_target, ds_coarse, ds_fine, Nsmin,
     ne_ex_clumps_voids = (1.-wglism*wlism) * (ne_smooth + wggc*negc) + wglism*wlism*nelism
     ne = (1-wgvN*wvoid)*ne_ex_clumps_voids  + wgvN*wvoid*nevN + wgcN*necN
 
-    dm_cumulate_vec = \
-        pc_in_kpc * array([trapz(ne[:j], sf_vec[:j]) for j in range(1, Ns_fine+1) ])
+    dm_cumulate_vec = pc_in_kpc * cumulative_trapezoid(ne, sf_vec)
     dm_calc_max = dm_cumulate_vec[-1]       
 
     # floats -> ints:
@@ -577,13 +575,10 @@ def dmdsm_d2dm(l, b, d_target, ds_coarse, ds_fine, Nsmin,
         # and then use cubic spline to find SM at d = dhat:.
 
         Nsf1 = np.size(sf_vec) + 1
-        dsm_cumulate1_vec = array([trapz(dsm[:j], sf_vec[:j]) for j in range(1, Nsf1)])
-        dsm_cumulate2_vec = \
-            array([trapz(sf_vec[:j]*dsm[:j], sf_vec[:j]) for j in range(1, Nsf1)])
-        dsm_cumulate3_vec = \
-            array([trapz(sf_vec[:j]**2*dsm[:j], sf_vec[:j]) for j in range(1, Nsf1)])
-        dsm_cumulate4_vec = \
-            array([trapz(sf_vec[:j]**sm_iso_index*dsm[:j], sf_vec[:j]) for j in range(1, Nsf1)])
+        dsm_cumulate1_vec = cumulative_trapezoid(dsm, sf_vec, initial=0.0)
+        dsm_cumulate2_vec = cumulative_trapezoid(sf_vec*dsm, sf_vec, initial=0.0)
+        dsm_cumulate3_vec = cumulative_trapezoid(sf_vec**2*dsm, sf_vec, initial=0.0)
+        dsm_cumulate4_vec = cumulative_trapezoid(sf_vec**sm_iso_index*dsm, sf_vec, initial=0.0)
 
         # sm quantities have proper SM units:
 
@@ -714,13 +709,13 @@ def analysis_dmd_dm_only(f24, f25,
         ddmcN = wgcN*necN * 1000
         ddmvN = wgvN*wvoid*nevN * 1000
 
-        dm1run = array([trapz(ddm1[0:j], sf_vec[0:j]) for j in range(size(ddm1))])
-        dm2run = array([trapz(ddm2[0:j], sf_vec[0:j]) for j in range(size(ddm2))])
-        dmarun = array([trapz(ddma[0:j], sf_vec[0:j]) for j in range(size(ddma))])
-        dmgcrun = array([trapz(ddmgc[0:j], sf_vec[0:j]) for j in range(size(ddmgc))])
-        dmlismrun = array([trapz(ddmlism[0:j], sf_vec[0:j]) for j in range(size(ddmlism))])
-        dmcNrun = array([trapz(ddmcN[0:j], sf_vec[0:j]) for j in range(size(ddmcN))])
-        dmvNrun = array([trapz(ddmvN[0:j], sf_vec[0:j]) for j in range(size(ddmvN))])
+        dm1run = cumulative_trapezoid(ddm1, sf_vec, initial=0.0) 
+        dm2run = cumulative_trapezoid(ddm2, sf_vec, initial=0.0) 
+        dmarun = cumulative_trapezoid(ddma, sf_vec, initial=0.0) 
+        dmgcrun = cumulative_trapezoid(ddmgc, sf_vec, initial=0.0) 
+        dmlismrun = cumulative_trapezoid(ddmlism, sf_vec, initial=0.0) 
+        dmcNrun = cumulative_trapezoid(ddmcN, sf_vec, initial=0.0) 
+        dmvNrun = cumulative_trapezoid(ddmvN, sf_vec, initial=0.0) 
 
         cs_dm1 = CubicSpline(sf_vec, dm1run)
         cs_dm2 = CubicSpline(sf_vec, dm2run)
@@ -899,13 +894,13 @@ def analysis_dmd_dm_and_sm(f24, f25,
     ddmvN = wgvN*wvoid*nevN * 1000
 
     # cumulative integrals of n_e components:
-    dm1run = array([trapz(ddm1[0:j], sf_vec[0:j]) for j in range(size(ddm1))])
-    dm2run = array([trapz(ddm2[0:j], sf_vec[0:j]) for j in range(size(ddm2))])
-    dmarun = array([trapz(ddma[0:j], sf_vec[0:j]) for j in range(size(ddma))])
-    dmgcrun = array([trapz(ddmgc[0:j], sf_vec[0:j]) for j in range(size(ddmgc))])
-    dmlismrun = array([trapz(ddmlism[0:j], sf_vec[0:j]) for j in range(size(ddmlism))])
-    dmcNrun = array([trapz(ddmcN[0:j], sf_vec[0:j]) for j in range(size(ddmcN))])
-    dmvNrun = array([trapz(ddmvN[0:j], sf_vec[0:j]) for j in range(size(ddmvN))])
+    dm1run = cumulative_trapezoid(ddm1, sf_vec, initial=0.0) 
+    dm2run = cumulative_trapezoid(ddm2, sf_vec, initial=0.0) 
+    dmarun = cumulative_trapezoid(ddma, sf_vec, initial=0.0) 
+    dmgcrun = cumulative_trapezoid(ddmgc, sf_vec, initial=0.0) 
+    dmlismrun = cumulative_trapezoid(ddmlism, sf_vec, initial=0.0) 
+    dmcNrun = cumulative_trapezoid(ddmcN, sf_vec, initial=0.0) 
+    dmvNrun = cumulative_trapezoid(ddmvN, sf_vec, initial=0.0) 
 
 
     # spline functions for cumulative DM components:
@@ -937,13 +932,13 @@ def analysis_dmd_dm_and_sm(f24, f25,
     dsma = wtotal*wga*nea**2*Fa
 
     # cumulative integrals of SM components (still divided by sm_factor)
-    sm1run = array([trapz(dsm1[0:j], sf_vec[0:j]) for j in range(size(dsm1))])
-    sm2run = array([trapz(dsm2[0:j], sf_vec[0:j]) for j in range(size(dsm2))])
-    smarun = array([trapz(dsma[0:j], sf_vec[0:j]) for j in range(size(dsma))])
-    smgcrun = array([trapz(dsmgc[0:j], sf_vec[0:j]) for j in range(size(dsmgc))])
-    smlismrun = array([trapz(dsmlism[0:j], sf_vec[0:j]) for j in range(size(dsmlism))])
-    smcNrun = array([trapz(dsmcN[0:j], sf_vec[0:j]) for j in range(size(dsmcN))])
-    smvNrun = array([trapz(dsmvN[0:j], sf_vec[0:j]) for j in range(size(dsmvN))])
+    sm1run = cumulative_trapezoid(dsm1, sf_vec) 
+    sm2run = cumulative_trapezoid(dsm2, sf_vec) 
+    smarun = cumulative_trapezoid(dsma, sf_vec) 
+    smgcrun = cumulative_trapezoid(dsmgc, sf_vec) 
+    smlismrun = cumulative_trapezoid(dsmlism, sf_vec) 
+    smcNrun = cumulative_trapezoid(dsmcN, sf_vec) 
+    smvNrun = cumulative_trapezoid(dsmvN, sf_vec) 
 
     # spline functions for cumulative SM components:
     cs_sm1 = CubicSpline(sf_vec, sm1run)
