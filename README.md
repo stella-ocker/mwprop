@@ -1,13 +1,13 @@
 # MWPROP
 
-Feb 2026 v2.0
+May 2026 v2.0.1
 
 MWPROP provides `NE2025p` and `NE2001p`, native Python implementations of the original Fortran code for NE2025/NE2001. The package also contains a required `scattering_functions` module. NE2025p/NE2001p are accessible from the command line, similar to the Fortran code, or within Python scripts (see below).
 
 The Fortran version of NE2025 is provided in the Github repository for MWPROP, along with distance and scattering data used to calibrate NE2025. See `mwprop/ne2025f`.
 
 
-Please cite [Ocker & Cordes (2026)](https://arxiv.org/abs/2602.11838) for use of NE2025.
+Please cite [Ocker & Cordes (2026)](https://ui.adsabs.harvard.edu/abs/2026ApJ..1002....3O/abstract) for use of NE2025.
 
 The first description of the conversion between Fortran and Python is given in the NE2001p research note [Ocker & Cordes (2024)](https://doi.org/10.3847/2515-5172/ad1bf1).\
 The NE2001 model is described in detail in [Cordes & Lazio (2002; ](https://arxiv.org/abs/astro-ph/0207156)[2003)](https://arxiv.org/abs/astro-ph/0301598). 
@@ -171,3 +171,11 @@ Users wishing to test if the Python installation behaves as expected may also ru
 mwprop v1.0: Extragalactic scattering times and scintillation bandwidths (TAU_X, SBW_X) output by mwprop.ne2001p v1.0 (pre-NE2025) are too small and large (respectively) by a factor of 2. This error is corrected in v2.0.  
 
 mwprop v2.0: Two of the smallest clumps in the model (1745-2900 and OH40.6-0.2) will have large differences between the Fortran and Python outputs, due to small differences in the sampling of the numerical integration that are minor for most clumps but exaggerated when the clump size is close to the integration grid sampling. For these sightlines, use of the Fortran code is recommended.
+
+-----
+
+## Version History
+
+v1.0 = native Python version of NE2001
+v2.0 = NE2025 release
+v2.0.1 = modest speed-ups to Python version
