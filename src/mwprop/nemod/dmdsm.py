@@ -1,4 +1,4 @@
-# mwprop v2.0.1 May 2026
+# mwprop v2.0.4 May 2026
 
 """
 dmdsm.py
