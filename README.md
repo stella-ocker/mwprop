@@ -1,6 +1,6 @@
 # MWPROP
 
-May 2026 v2.0.3
+May 2026 v2.0.4
 
 MWPROP provides `NE2025p` and `NE2001p`, native Python implementations of the original Fortran code for NE2025/NE2001. The package also contains a required `scattering_functions` module. NE2025p/NE2001p are accessible from the command line, similar to the Fortran code, or within Python scripts (see below).
 
@@ -177,5 +177,5 @@ mwprop v2.0: Two of the smallest clumps in the model (1745-2900 and OH40.6-0.2) 
 ## Version History
 
 v1.0 = native Python version of NE2001
-v2.0 = NE2025 release
-v2.0.1 = modest speed-ups to Python version
+v2.0.0 = NE2025 release
+v2.0.4 = modest speed-ups to Python version
