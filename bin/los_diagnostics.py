@@ -16,14 +16,13 @@ JMC 2024 Jan 3
 """
 
 from matplotlib.pyplot import suptitle
-from numpy import *
 import numpy as np
+import argparse
+import sys,os
 if int(np.__version__[0]) >=2:
     from numpy import trapezoid as trapz
 else:
     from numpy import trapz
-import argparse
-import sys,os
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 basename = sys.argv[0].split('/')[-1].split('.')[0]         # for plot file name
@@ -160,7 +159,7 @@ if __name__ == '__main__':
         ds = float(args.ds)
         v = int(args.v)
 
-        l, b = deg2rad((ldeg, bdeg))
+        l, b = np.deg2rad((ldeg, bdeg))
 
         if v==2001:
             # Directory for reading the f25 file written by NE20x (from call below)
@@ -273,9 +272,9 @@ if __name__ == '__main__':
     DMmax = dm25.max()
 
     # Effective distances based on LoS integrals weighted by various functions of n_e:
-    dbar_ne = np.trapz(s25*ne25, s25) / np.trapz(ne25, s25)
-    dbar_ne2 = np.trapz(s25*ne25**2, s25) / np.trapz(ne25**2, s25)
-    deffsm2 =  np.trapz(s25*Cn2_vs_s25, s25) / np.trapz(Cn2_vs_s25, s25)
+    dbar_ne = trapz(s25*ne25, s25) / trapz(ne25, s25)
+    dbar_ne2 = trapz(s25*ne25**2, s25) / trapz(ne25**2, s25)
+    deffsm2 =  trapz(s25*Cn2_vs_s25, s25) / trapz(Cn2_vs_s25, s25)
 
     # Cumulative DM and SM: not currently used, so commented out; may use later so keep.
     #DMvec = 1000.*np.array([np.trapz(ne25[:j], s25[:j]) for j in range(np.size(s25))])
