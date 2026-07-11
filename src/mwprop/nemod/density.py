@@ -98,7 +98,7 @@ def density_2001(x, y, z, inds_relevant=None, verbose=False):
     if wglism == 1: 
         nelism, Flism, wlism, wldr, wlhb, wlsb, wloopI = ne_lism(x,y,z)
     if wgcN == 1: 
-        necN, FcN, hitclump = neclumpN(x,y,z, inds_relevant=inds_relevant)
+        necN, FcN, hitclump, arg = neclumpN(x,y,z, inds_relevant=inds_relevant)
     if wgvN == 1: 
         nevN, FvN, hitvoid, wvoid = nevoidN(x,y,z)
 
